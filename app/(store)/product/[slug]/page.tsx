@@ -1,55 +1,62 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProduct, products } from "@/lib/products";
+import { getProductBySlug } from "@/lib/queries";
 import ProductInfo from "@/components/ProductInfo";
 import BrailleDots from "@/components/BrailleDots";
 
-export function generateStaticParams() {
-  return products.map((p) => ({ id: p.id }));
+export const dynamic = "force-dynamic";
+
+type Params = Promise<{ slug: string }>;
+
+export async function generateMetadata({ params }: { params: Params }) {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+  return { title: product ? `${product.name} — HONEY PUNCH` : "HONEY PUNCH" };
 }
 
-export default async function ProductDetail({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const product = getProduct(id);
+export default async function ProductDetail({ params }: { params: Params }) {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
+
+  // 대표 이미지 + 추가 이미지. 추가 이미지가 없으면 대표 이미지를 한 번 더 보여준다.
+  const gallery = product.images.length > 0
+    ? [product.image, ...product.images]
+    : [product.image, product.image];
 
   return (
     <main className="lg:grid lg:grid-cols-[58%_42%]">
-      {/* 좌측: 이미지 영역 */}
+      {/* 좌측: 이미지 */}
       <div className="flex flex-col gap-2 bg-[#f2f1ef] p-2">
-        {[0, 1].map((i) => (
-          <div key={i} className="bg-[#f2f1ef]">
+        {gallery.map((src, i) => (
+          <div key={i} className="relative aspect-4/5 bg-[#f2f1ef]">
             <Image
-              src={product.image}
+              src={src}
               alt={product.name}
-              width={800}
-              height={1000}
+              fill
               priority={i === 0}
-              className="h-auto w-full"
+              sizes="(max-width: 1024px) 100vw, 58vw"
+              className="object-cover"
             />
           </div>
         ))}
       </div>
 
-      {/* 우측: 상품 정보 (스크롤 시 고정) */}
+      {/* 우측: 상품 정보 */}
       <div className="px-6 py-10 lg:sticky lg:top-16 lg:self-start lg:px-14 lg:py-16">
         <p className="text-[12px] text-neutral-400">
           <Link href="/shop" className="hover:text-black">
             Shop
           </Link>{" "}
           /{" "}
-          <Link href="/shop" className="hover:text-black">
-            New In
+          <Link href={`/shop?category=${product.category}`} className="hover:text-black">
+            {product.category}
           </Link>
         </p>
+
         <ProductInfo product={product} />
 
-        {/* 캠페인 스토리 배너 */}
         {product.campaignStory && (
           <Link
             href="/campaign"

@@ -1,19 +1,32 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { CATEGORIES } from "@/lib/product-types";
+import { useStore } from "./StoreProvider";
 
 const MENU = [
-  { label: "Clearance Sale", href: "/shop" },
   { label: "New In", href: "/shop" },
-  { label: "Shop", href: "/shop" },
+  ...CATEGORIES.map((c) => ({ label: c.label, href: `/shop?category=${c.key}` })),
   { label: "Campaign", href: "/campaign" },
-  { label: "Collections", href: "/shop" },
-  { label: "About", href: "/campaign" },
 ];
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const router = useRouter();
+  const { cartCount, wishlist, ready } = useStore();
+
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const term = q.trim();
+    if (!term) return;
+    setSearchOpen(false);
+    setOpen(false);
+    router.push(`/shop?q=${encodeURIComponent(term)}`);
+  }
 
   return (
     <>
@@ -48,32 +61,57 @@ export default function Header() {
 
           {/* 우측: 유틸 */}
           <nav className="ml-auto hidden items-center gap-6 text-[11px] tracking-[0.12em] lg:flex">
-            <button className="flex items-center gap-1.5 hover:opacity-60">
+            <button
+              onClick={() => setSearchOpen((v) => !v)}
+              className="flex items-center gap-1.5 hover:opacity-60"
+            >
               <IconSearch />
               SEARCH
             </button>
-            <button className="flex items-center gap-1.5 hover:opacity-60">
+            <span className="flex items-center gap-1.5 text-neutral-400">
               <IconGlobe />
               한국어 | KRW
-            </button>
-            <Link href="#" className="flex items-center gap-1.5 hover:opacity-60">
+            </span>
+            <Link href="/admin" className="flex items-center gap-1.5 hover:opacity-60">
               <IconUser />
               ACCOUNT
             </Link>
-            <Link href="#" className="flex items-center gap-1.5 hover:opacity-60">
+            <Link href="/wishlist" className="flex items-center gap-1.5 hover:opacity-60">
               <IconHeart />
-              WISH
+              WISH{ready && wishlist.length > 0 ? ` ${wishlist.length}` : ""}
             </Link>
-            <Link href="#" className="flex items-center gap-1.5 hover:opacity-60">
+            <Link href="/cart" className="flex items-center gap-1.5 hover:opacity-60">
               <IconBag />
-              0
+              {ready ? cartCount : 0}
             </Link>
           </nav>
-          <Link href="#" className="ml-auto flex items-center gap-1.5 text-[11px] lg:hidden">
-            <IconBag />
-            0
-          </Link>
+
+          <div className="ml-auto flex items-center gap-4 lg:hidden">
+            <button onClick={() => setSearchOpen((v) => !v)} aria-label="검색">
+              <IconSearch />
+            </button>
+            <Link href="/cart" className="flex items-center gap-1.5 text-[11px]">
+              <IconBag />
+              {ready ? cartCount : 0}
+            </Link>
+          </div>
         </div>
+
+        {/* 검색 바 */}
+        {searchOpen && (
+          <form
+            onSubmit={submitSearch}
+            className="border-t border-neutral-200 px-6 py-4 lg:px-12"
+          >
+            <input
+              autoFocus
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="상품명 또는 품번을 입력하세요"
+              className="w-full border-b border-neutral-300 pb-2 text-[14px] outline-none focus:border-black"
+            />
+          </form>
+        )}
       </header>
 
       {/* 드로어 메뉴 */}
@@ -82,10 +120,7 @@ export default function Header() {
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
-        <div
-          className="absolute inset-0 bg-black/30"
-          onClick={() => setOpen(false)}
-        />
+        <div className="absolute inset-0 bg-black/30" onClick={() => setOpen(false)} />
         <aside
           className={`absolute inset-y-0 left-0 w-[320px] max-w-[85vw] bg-white px-9 py-8 transition-transform duration-300 ${
             open ? "translate-x-0" : "-translate-x-full"
@@ -110,9 +145,15 @@ export default function Header() {
             ))}
           </nav>
           <div className="mt-14 flex flex-col gap-3 text-[12px] tracking-[0.08em] text-neutral-500">
-            <span>Search</span>
-            <span>Wishlist</span>
-            <span>Account</span>
+            <Link href="/wishlist" onClick={() => setOpen(false)} className="hover:text-black">
+              Wishlist
+            </Link>
+            <Link href="/cart" onClick={() => setOpen(false)} className="hover:text-black">
+              Cart
+            </Link>
+            <Link href="/admin" onClick={() => setOpen(false)} className="hover:text-black">
+              Admin
+            </Link>
             <span>한국어 (KRW)</span>
           </div>
         </aside>

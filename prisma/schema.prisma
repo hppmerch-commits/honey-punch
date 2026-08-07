@@ -1,0 +1,55 @@
+// 허니펀치 데이터 모델
+// 문서: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id String @id @default(cuid())
+
+  /// URL 경로에 쓰이는 식별자 (/product/{slug})
+  slug String @unique
+  name String
+  sku  String
+
+  /// 판매가 (원). 정가가 있으면 할인율이 자동 계산된다.
+  price         Int
+  originalPrice Int?
+
+  /// outer | top | bottom | acc
+  category String
+
+  /// 대표 이미지 경로. 추가 이미지는 images에 순서대로 담는다.
+  image  String
+  images String[] @default([])
+
+  /// 상세 설명 (줄 단위)
+  description String[] @default([])
+  sizes       String[] @default([])
+
+  /// [{ name: "BLACK", hex: "#26262a" }, ...]
+  colors Json @default("[]")
+
+  stock     Int     @default(0)
+  soldOut   Boolean @default(false)
+  /// false면 스토어프론트에 노출되지 않는다 (임시 저장용)
+  published Boolean @default(true)
+
+  /// 캠페인 스토리(/campaign) 배너를 상세 페이지에 노출할지
+  campaignStory Boolean @default(false)
+
+  /// 목록 정렬 순서 (작을수록 앞)
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category, published])
+  @@index([sortOrder])
+}

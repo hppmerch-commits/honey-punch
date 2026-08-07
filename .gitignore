@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/lib/generated/prisma
+
+# prisma generated client (빌드 시 재생성)
+/lib/generated
+
+# 로컬 업로드 이미지
+/.uploads
+
+# prisma init이 만든 에이전트 스킬 문서 (재생성 가능)
+/.agents
+/.windsurf
+/.claude/skills
+/skills-lock.json

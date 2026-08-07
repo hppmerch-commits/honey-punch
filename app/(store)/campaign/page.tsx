@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import BrailleDots from "@/components/BrailleDots";
+import { listCampaignProducts } from "@/lib/queries";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "손끝으로 고르는 오늘의 기분 — HONEY PUNCH",
@@ -66,7 +69,10 @@ const STEPS: {
   },
 ];
 
-export default function CampaignPage() {
+export default async function CampaignPage() {
+  // 캠페인 상품은 관리자 페이지에서 "캠페인 스토리 배너 노출"을 켠 상품이다.
+  const campaignProducts = await listCampaignProducts();
+
   return (
     <main>
       {/* ① 히어로 */}
@@ -225,18 +231,28 @@ export default function CampaignPage() {
           점자 패치 티셔츠 판매 수익의 일부는 시각장애인 단체에 기부됩니다.
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            href="/product/braille-patch-tee-black"
-            className="flex h-13 w-64 items-center justify-center bg-black px-8 text-[12px] tracking-[0.12em] text-white transition-opacity hover:opacity-85"
-          >
-            BRAILLE PATCH TEE — BLACK
-          </Link>
-          <Link
-            href="/product/braille-patch-tee-white"
-            className="flex h-13 w-64 items-center justify-center border border-neutral-300 px-8 text-[12px] tracking-[0.12em] transition-colors hover:border-black"
-          >
-            BRAILLE PATCH TEE — WHITE
-          </Link>
+          {campaignProducts.length > 0 ? (
+            campaignProducts.map((p, i) => (
+              <Link
+                key={p.id}
+                href={`/product/${p.slug}`}
+                className={`flex h-14 w-72 items-center justify-center px-8 text-[12px] tracking-[0.12em] transition-colors ${
+                  i === 0
+                    ? "bg-black text-white hover:opacity-85"
+                    : "border border-neutral-300 hover:border-black"
+                }`}
+              >
+                {p.name}
+              </Link>
+            ))
+          ) : (
+            <Link
+              href="/shop"
+              className="flex h-14 w-72 items-center justify-center bg-black px-8 text-[12px] tracking-[0.12em] text-white transition-opacity hover:opacity-85"
+            >
+              SHOP ALL
+            </Link>
+          )}
         </div>
       </section>
     </main>
