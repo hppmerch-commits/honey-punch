@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <defs>
+    <linearGradient id="f" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9e7dd"/>
+      <stop offset="1" stop-color="#cfd2c0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#f)"/>
+  <!-- 접힌 원단 더미 -->
+  <g>
+    <rect x="150" y="620" width="500" height="120" rx="18" fill="#8f9a7e"/>
+    <rect x="170" y="500" width="460" height="120" rx="18" fill="#f2f0ea"/>
+    <rect x="160" y="380" width="480" height="120" rx="18" fill="#242427"/>
+    <rect x="180" y="260" width="440" height="120" rx="18" fill="#d9d7d2"/>
+  </g>
+  <!-- 잎 모티프 -->
+  <path d="M620,180 C560,120 560,60 620,20 C680,60 680,120 620,180 Z" fill="#a3af8d" opacity="0.85"/>
+  <path d="M620,175 L620,30" stroke="#8f9a7e" stroke-width="4"/>
+</svg>

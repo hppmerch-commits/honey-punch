@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#242427"/>
+      <stop offset="1" stop-color="#121214"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="0.5" cy="0.35" r="0.9">
+      <stop offset="0" stop-color="#f7f6f4"/>
+      <stop offset="1" stop-color="#edecea"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <ellipse cx="400" cy="830" rx="230" ry="26" fill="#000" opacity="0.05"/>
+  <path d="M400,230 C360,230 335,242 325,255 L235,295 C205,310 195,335 205,360 L240,432 C247,447 265,454 280,447 L308,434 L308,750 C308,775 323,790 348,790 L452,790 C477,790 492,775 492,750 L492,434 L520,447 C535,454 553,447 560,432 L595,360 C605,335 595,310 565,295 L475,255 C465,242 440,230 400,230 Z" fill="url(#g)"/>
+  <path d="M348,244 C362,268 438,268 452,244" stroke="#121214" stroke-width="6" fill="none" opacity="0.6"/>
+  <!-- 소매 끝 실리콘 점자 패치 -->
+  <rect x="524" y="404" width="46" height="28" rx="6" fill="#39393d"/>
+  <circle cx="534" cy="410" r="3" fill="#8f8f95"/><circle cx="534" cy="418" r="3" fill="#8f8f95"/><circle cx="534" cy="426" r="3" fill="none"/><circle cx="542" cy="410" r="3" fill="none"/><circle cx="542" cy="418" r="3" fill="none"/><circle cx="542" cy="426" r="3" fill="none"/>
+  <circle cx="552" cy="410" r="3" fill="#8f8f95"/><circle cx="552" cy="418" r="3" fill="none"/><circle cx="552" cy="426" r="3" fill="#8f8f95"/><circle cx="560" cy="410" r="3" fill="none"/><circle cx="560" cy="418" r="3" fill="#8f8f95"/><circle cx="560" cy="426" r="3" fill="none"/>
+  <circle cx="547" cy="418" r="44" fill="none" stroke="#b9b6b0" stroke-width="2" stroke-dasharray="4 6"/>
+  <text x="400" y="945" text-anchor="middle" font-family="Georgia, serif" font-size="22" letter-spacing="6" fill="#b9b6b0">HONEY PUNCH</text>
+</svg>

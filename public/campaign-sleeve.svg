@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1000">
+  <defs>
+    <linearGradient id="cloth" x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0" stop-color="#2a2a2e"/>
+      <stop offset="1" stop-color="#161618"/>
+    </linearGradient>
+  </defs>
+  <rect width="2400" height="1000" fill="url(#cloth)"/>
+  <!-- 원단 결 -->
+  <g stroke="#3a3a3f" stroke-width="2" opacity="0.5">
+    <path d="M0,180 C700,140 1500,240 2400,190"/>
+    <path d="M0,420 C800,380 1600,470 2400,430"/>
+    <path d="M0,660 C700,620 1500,710 2400,670"/>
+    <path d="M0,880 C800,840 1600,930 2400,890"/>
+  </g>
+  <!-- 소매 시접선 -->
+  <path d="M1560,0 C1520,340 1530,700 1580,1000" stroke="#46464c" stroke-width="5" fill="none"/>
+  <path d="M1600,0 C1560,340 1570,700 1620,1000" stroke="#46464c" stroke-width="3" fill="none" stroke-dasharray="12 10"/>
+  <!-- 실리콘 패치 -->
+  <rect x="1740" y="380" width="300" height="180" rx="28" fill="#3c3c42"/>
+  <rect x="1740" y="380" width="300" height="180" rx="28" fill="none" stroke="#525158" stroke-width="3"/>
+  <circle cx="1813" cy="424" r="16" fill="#9c9ca4"/><circle cx="1813" cy="470" r="16" fill="#9c9ca4"/><circle cx="1813" cy="516" r="16" fill="none"/><circle cx="1859" cy="424" r="16" fill="none"/><circle cx="1859" cy="470" r="16" fill="none"/><circle cx="1859" cy="516" r="16" fill="none"/>
+  <circle cx="1925" cy="424" r="16" fill="#9c9ca4"/><circle cx="1925" cy="470" r="16" fill="none"/><circle cx="1925" cy="516" r="16" fill="#9c9ca4"/><circle cx="1971" cy="424" r="16" fill="none"/><circle cx="1971" cy="470" r="16" fill="#9c9ca4"/><circle cx="1971" cy="516" r="16" fill="none"/>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b2b2e"/>
+      <stop offset="1" stop-color="#161618"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="0.5" cy="0.35" r="0.9">
+      <stop offset="0" stop-color="#f7f6f4"/>
+      <stop offset="1" stop-color="#edecea"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <ellipse cx="400" cy="830" rx="230" ry="26" fill="#000" opacity="0.05"/>
+  
+    <path d="M285,380 L515,380 C528,380 535,388 536,400 L556,660 C558,682 544,695 522,695 L448,695 C430,695 418,684 415,666 L400,510 L385,666 C382,684 370,695 352,695 L278,695 C256,695 242,682 244,660 L264,400 C265,388 272,380 285,380 Z" fill="url(#g)"/>
+    <rect x="285" y="380" width="230" height="16" fill="#161618" opacity="0.45"/>
+    <path d="M400,396 L400,470" stroke="#161618" stroke-width="3" opacity="0.4"/>
+  <text x="400" y="945" text-anchor="middle" font-family="Georgia, serif" font-size="22" letter-spacing="6" fill="#b9b6b0">HONEY PUNCH</text>
+</svg>
