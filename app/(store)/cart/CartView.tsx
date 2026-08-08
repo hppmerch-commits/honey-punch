@@ -1,16 +1,45 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { won } from "@/lib/product-types";
+import { won, isSoldOut, type Product } from "@/lib/product-types";
 import { useStore, itemKey } from "@/components/StoreProvider";
 
 const FREE_SHIPPING_FROM = 70000;
 const SHIPPING_FEE = 3000;
 
-export default function CartView() {
-  const { cart, cartTotal, updateQty, removeFromCart, clearCart, ready } =
-    useStore();
+export default function CartView({ products }: { products: Product[] }) {
+  const { cart, updateQty, removeFromCart, clearCart, ready } = useStore();
+
+  const bySlug = useMemo(
+    () => new Map(products.map((p) => [p.slug, p])),
+    [products]
+  );
+
+  // 판매중인 상품만 남기고, 이름·가격·이미지는 DB 값을 기준으로 표시한다.
+  const items = useMemo(
+    () =>
+      cart
+        .map((item) => {
+          const p = bySlug.get(item.slug);
+          if (!p || isSoldOut(p)) return null;
+          return { ...item, name: p.name, price: p.price, image: p.image };
+        })
+        .filter((v): v is NonNullable<typeof v> => v !== null),
+    [cart, bySlug]
+  );
+
+  // 더 이상 살 수 없는 상품은 장바구니에서 자동으로 뺀다.
+  useEffect(() => {
+    if (!ready) return;
+    for (const item of cart) {
+      const p = bySlug.get(item.slug);
+      if (!p || isSoldOut(p)) removeFromCart(itemKey(item));
+    }
+  }, [ready, cart, bySlug, removeFromCart]);
+
+  const cartTotal = items.reduce((n, i) => n + i.price * i.qty, 0);
 
   if (!ready) {
     return (
@@ -22,13 +51,13 @@ export default function CartView() {
   }
 
   const shipping =
-    cart.length === 0 || cartTotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING_FEE;
+    items.length === 0 || cartTotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING_FEE;
 
   return (
     <main className="px-6 py-14 lg:px-12">
       <div className="flex items-end justify-between">
         <h1 className="text-[26px] leading-none lg:text-[30px]">장바구니</h1>
-        {cart.length > 0 && (
+        {items.length > 0 && (
           <button
             onClick={clearCart}
             className="text-[12px] text-neutral-400 hover:text-black"
@@ -38,7 +67,7 @@ export default function CartView() {
         )}
       </div>
 
-      {cart.length === 0 ? (
+      {items.length === 0 ? (
         <div className="mt-16 border border-dashed border-neutral-200 py-24 text-center">
           <p className="text-[13px] text-neutral-400">장바구니가 비어 있습니다.</p>
           <Link
@@ -52,66 +81,70 @@ export default function CartView() {
         <div className="mt-10 gap-12 lg:grid lg:grid-cols-[1fr_320px]">
           {/* 상품 목록 */}
           <ul className="border-t border-neutral-200">
-            {cart.map((item) => {
+            {items.map((item) => {
               const key = itemKey(item);
               return (
-                <li key={key} className="flex gap-5 border-b border-neutral-100 py-6">
+                <li
+                  key={key}
+                  className="flex gap-4 border-b border-neutral-100 py-6 sm:gap-5"
+                >
                   <Link
                     href={`/product/${item.slug}`}
-                    className="relative h-32 w-24 shrink-0 overflow-hidden bg-[#f2f1ef]"
+                    className="relative h-28 w-20 shrink-0 overflow-hidden bg-[#f2f1ef] sm:h-32 sm:w-24"
                   >
                     <Image
                       src={item.image}
                       alt={item.name}
                       fill
-                      sizes="96px"
+                      sizes="(max-width: 640px) 80px, 96px"
                       className="object-cover"
                     />
                   </Link>
 
-                  <div className="flex flex-1 flex-col">
-                    <Link
-                      href={`/product/${item.slug}`}
-                      className="text-[13px] leading-snug hover:underline"
-                    >
-                      {item.name}
-                    </Link>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <div className="flex items-start justify-between gap-3">
+                      <Link
+                        href={`/product/${item.slug}`}
+                        className="text-[13px] leading-snug hover:underline"
+                      >
+                        {item.name}
+                      </Link>
+                      <button
+                        onClick={() => removeFromCart(key)}
+                        aria-label="상품 삭제"
+                        className="shrink-0 text-[12px] text-neutral-400 hover:text-black"
+                      >
+                        삭제
+                      </button>
+                    </div>
                     <p className="mt-1.5 text-[12px] text-neutral-400">
                       {[item.color, item.size].filter(Boolean).join(" / ")}
                     </p>
 
-                    <div className="mt-auto flex items-center justify-between pt-4">
+                    <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pt-4">
                       <div className="flex items-center border border-neutral-300">
                         <button
                           aria-label="수량 감소"
                           onClick={() => updateQty(key, item.qty - 1)}
-                          className="h-9 w-9 text-[14px] hover:bg-neutral-50"
+                          className="h-8 w-8 text-[14px] hover:bg-neutral-50 sm:h-9 sm:w-9"
                         >
                           −
                         </button>
-                        <span className="w-10 text-center text-[13px]">
+                        <span className="w-8 text-center text-[13px] sm:w-10">
                           {item.qty}
                         </span>
                         <button
                           aria-label="수량 증가"
                           onClick={() => updateQty(key, item.qty + 1)}
-                          className="h-9 w-9 text-[14px] hover:bg-neutral-50"
+                          className="h-8 w-8 text-[14px] hover:bg-neutral-50 sm:h-9 sm:w-9"
                         >
                           +
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-5">
-                        <span className="text-[14px] font-medium">
-                          {won(item.price * item.qty)}
-                        </span>
-                        <button
-                          onClick={() => removeFromCart(key)}
-                          className="text-[12px] text-neutral-400 hover:text-black"
-                        >
-                          삭제
-                        </button>
-                      </div>
+                      <span className="text-[14px] font-medium">
+                        {won(item.price * item.qty)}
+                      </span>
                     </div>
                   </div>
                 </li>

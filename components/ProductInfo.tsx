@@ -134,10 +134,8 @@ export default function ProductInfo({ product }: { product: Product }) {
       {product.sizes.length > 0 && (
         <div className="mt-8">
           <p className="text-[12px] tracking-[0.14em] text-neutral-600">SIZE</p>
-          <div
-            className="mt-3 grid gap-4"
-            style={{ gridTemplateColumns: `repeat(${product.sizes.length}, 1fr)` }}
-          >
+          {/* 사이즈가 많아도 모바일에서 찌그러지지 않도록 최소 폭을 두고 줄바꿈 */}
+          <div className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(64px,1fr))] gap-3 sm:gap-4">
             {product.sizes.map((s) => (
               <button
                 key={s}

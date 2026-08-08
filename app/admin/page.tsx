@@ -37,7 +37,73 @@ export default async function AdminProductsPage() {
           등록된 상품이 없습니다. 우측 상단에서 상품을 등록해 주세요.
         </p>
       ) : (
-        <div className="overflow-x-auto">
+        <>
+        {/* 모바일: 카드 목록 */}
+        <ul className="space-y-4 lg:hidden">
+          {products.map((p) => {
+            const rate = discountRate(p.price, p.originalPrice);
+            const sold = p.soldOut || p.stock <= 0;
+            return (
+              <li key={p.id} className="flex gap-4 border border-neutral-200 p-4">
+                <div className="relative h-24 w-20 shrink-0 overflow-hidden bg-[#f2f1ef]">
+                  <Image src={p.image} alt="" fill sizes="80px" className="object-cover" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={`/admin/products/${p.id}`}
+                    className="block text-[13px] leading-snug hover:underline"
+                  >
+                    {p.name}
+                  </Link>
+                  <p className="mt-1 text-[11px] text-neutral-400">
+                    {categoryLabel(p.category)} · 재고 {p.stock}
+                  </p>
+                  <p className="mt-1.5 text-[13px]">
+                    {won(p.price)}
+                    {rate > 0 && (
+                      <span className="ml-1.5 text-[11px] text-red-500">{rate}%</span>
+                    )}
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px]">
+                    <span
+                      className={`px-2 py-0.5 text-[11px] ${
+                        sold
+                          ? "bg-neutral-100 text-neutral-400"
+                          : p.published
+                            ? "bg-black text-white"
+                            : "bg-neutral-200 text-neutral-600"
+                      }`}
+                    >
+                      {sold ? "품절" : p.published ? "노출중" : "숨김"}
+                    </span>
+                    <Link
+                      href={`/admin/products/${p.id}`}
+                      className="text-neutral-600 hover:text-black"
+                    >
+                      수정
+                    </Link>
+                    <form action={togglePublishedAction}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <input type="hidden" name="next" value={String(!p.published)} />
+                      <button className="text-neutral-600 hover:text-black">
+                        {p.published ? "숨기기" : "노출"}
+                      </button>
+                    </form>
+                    <form action={deleteProductAction}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <button className="text-neutral-400 hover:text-red-500">
+                        삭제
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* 데스크톱: 표 */}
+        <div className="hidden overflow-x-auto lg:block">
           <table className="w-full min-w-[900px] text-[13px]">
             <thead>
               <tr className="border-y border-neutral-200 text-left text-[11px] tracking-[0.1em] text-neutral-400">
@@ -136,6 +202,7 @@ export default async function AdminProductsPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
     </AdminShell>
   );

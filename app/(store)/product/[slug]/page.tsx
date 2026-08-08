@@ -60,25 +60,26 @@ export default async function ProductDetail({ params }: { params: Params }) {
         {product.campaignStory && (
           <Link
             href="/campaign"
-            className="group mt-12 flex items-center justify-between border border-neutral-200 px-6 py-5 transition-colors hover:border-black"
+            className="group mt-12 flex items-center justify-between gap-4 border border-neutral-200 px-5 py-5 transition-colors hover:border-black sm:px-6"
           >
-            <div className="flex items-center gap-4">
-              <span className="flex gap-2" aria-hidden="true">
+            <div className="flex min-w-0 items-center gap-4">
+              <span className="flex shrink-0 gap-2" aria-hidden="true">
                 <BrailleDots dots={[1, 2]} dotClassName="bg-[#d9a715]" emptyClassName="bg-neutral-100" />
                 <BrailleDots dots={[1, 3, 5]} dotClassName="bg-[#d9a715]" emptyClassName="bg-neutral-100" />
               </span>
-              <span>
+              <span className="min-w-0">
                 <span className="block text-[11px] tracking-[0.2em] text-neutral-400">
                   CAMPAIGN
                 </span>
-                <span className="mt-1 block text-[13px]">
-                  손끝으로 고르는 오늘의 기분 — 이 티셔츠에 담긴 이야기
+                <span className="mt-1 block text-[13px] leading-snug">
+                  손끝으로 고르는 오늘의 기분
+                  <span className="hidden sm:inline"> — 이 티셔츠에 담긴 이야기</span>
                 </span>
               </span>
             </div>
             <span
               aria-hidden="true"
-              className="text-neutral-400 transition-transform group-hover:translate-x-1 group-hover:text-black"
+              className="shrink-0 text-neutral-400 transition-transform group-hover:translate-x-1 group-hover:text-black"
             >
               →
             </span>

@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// 마뗑킴 스타일 게이트웨이: 풀스크린 화보 2분할 + 중앙 로고 + Campaign/Shop
+// 마뗑킴 스타일 게이트웨이: 풀스크린 화보 + 중앙 로고 + Campaign/Shop
+// 모바일에서는 가로 한 줄이 잘리므로 로고 아래로 버튼을 내린다.
 export default function Gateway() {
   return (
     <main className="relative h-dvh w-full overflow-hidden">
@@ -12,6 +13,7 @@ export default function Gateway() {
             alt="뉴트럴 톤의 티셔츠를 입고 걸어가는 모델들"
             fill
             priority
+            sizes="50vw"
             className="object-cover"
           />
         </div>
@@ -21,6 +23,7 @@ export default function Gateway() {
             alt="붉은 니트 위로 서로 맞잡은 두 사람의 손"
             fill
             priority
+            sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover"
           />
         </div>
@@ -32,23 +35,42 @@ export default function Gateway() {
         Honey Punch
       </p>
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="flex items-center gap-4 lg:gap-6">
+      <div className="absolute inset-0 flex items-center justify-center px-6">
+        {/* 모바일: 로고 아래 버튼 2개 / md 이상: 마뗑킴처럼 가로 한 줄 */}
+        <div className="flex w-full max-w-[1100px] flex-col items-center gap-7 md:flex-row md:justify-center md:gap-8">
           <Link
             href="/campaign"
-            className="border border-white px-7 py-3 text-[15px] text-white transition-colors hover:bg-white hover:text-black lg:px-9"
+            className="hidden shrink-0 border border-white px-8 py-3 text-[15px] text-white transition-colors hover:bg-white hover:text-black md:block"
           >
             Campaign
           </Link>
-          <h1 className="font-logo whitespace-nowrap px-2 text-[clamp(36px,5.5vw,88px)] text-white">
+
+          <h1 className="font-logo text-center text-[clamp(38px,11vw,88px)] leading-none text-white md:whitespace-nowrap md:px-2">
             Honey Punch
           </h1>
+
           <Link
             href="/shop"
-            className="border border-white px-7 py-3 text-[15px] text-white transition-colors hover:bg-white hover:text-black lg:px-9"
+            className="hidden shrink-0 border border-white px-8 py-3 text-[15px] text-white transition-colors hover:bg-white hover:text-black md:block"
           >
             Shop
           </Link>
+
+          {/* 모바일 전용 버튼 행 */}
+          <div className="flex w-full max-w-[340px] gap-3 md:hidden">
+            <Link
+              href="/campaign"
+              className="flex h-12 flex-1 items-center justify-center border border-white text-[14px] text-white active:bg-white active:text-black"
+            >
+              Campaign
+            </Link>
+            <Link
+              href="/shop"
+              className="flex h-12 flex-1 items-center justify-center border border-white text-[14px] text-white active:bg-white active:text-black"
+            >
+              Shop
+            </Link>
+          </div>
         </div>
       </div>
     </main>
