@@ -112,19 +112,25 @@ export default function ProductInfo({ product }: { product: Product }) {
             <p className="text-[12px] tracking-[0.14em] text-neutral-600">COLOR</p>
             <p className="text-[13px]">{product.colors[color]?.name}</p>
           </div>
-          <div className="mt-3 flex gap-3">
+          {/* 스와치는 20px지만 버튼 자체는 44px 터치 영역을 갖는다 */}
+          <div className="mt-1 -ml-3 flex">
             {product.colors.map((c, i) => (
               <button
                 key={c.name}
                 aria-label={c.name}
+                aria-pressed={i === color}
                 onClick={() => setColor(i)}
-                className={`h-5 w-5 rounded-full border ${
-                  i === color
-                    ? "border-black ring-1 ring-black ring-offset-2"
-                    : "border-neutral-300"
-                }`}
-                style={{ backgroundColor: c.hex }}
-              />
+                className="flex h-11 w-11 items-center justify-center active:opacity-60"
+              >
+                <span
+                  className={`block h-5 w-5 rounded-full border ${
+                    i === color
+                      ? "border-black ring-1 ring-black ring-offset-2"
+                      : "border-neutral-300"
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -143,10 +149,11 @@ export default function ProductInfo({ product }: { product: Product }) {
                   setSize(s);
                   setNotice(null);
                 }}
-                className={`border-b pb-2 text-center text-[13px] transition-colors ${
+                aria-pressed={size === s}
+                className={`flex h-11 items-center justify-center border-b text-center text-[14px] transition-colors active:opacity-60 ${
                   size === s
                     ? "border-black font-medium"
-                    : "border-neutral-300 text-neutral-500 hover:border-black hover:text-black"
+                    : "border-neutral-300 text-neutral-500 lg:hover:border-black lg:hover:text-black"
                 }`}
               >
                 {s}
@@ -173,13 +180,13 @@ export default function ProductInfo({ product }: { product: Product }) {
           <>
             <button
               onClick={() => handleAdd(true)}
-              className="h-14 flex-[1.6] bg-black text-[13px] tracking-[0.1em] text-white transition-opacity hover:opacity-85"
+              className="h-14 flex-[1.4] bg-black text-[13px] tracking-[0.1em] text-white transition-opacity active:opacity-70 lg:hover:opacity-85"
             >
               BUY IT NOW
             </button>
             <button
               onClick={() => handleAdd(false)}
-              className="h-14 flex-1 border border-l-0 border-neutral-300 text-[13px] tracking-[0.1em] transition-colors hover:border-black"
+              className="h-14 flex-1 border border-l-0 border-neutral-300 text-[13px] tracking-[0.1em] transition-colors active:bg-neutral-50 lg:hover:border-black"
             >
               ADD TO BAG
             </button>
@@ -189,7 +196,7 @@ export default function ProductInfo({ product }: { product: Product }) {
 
       <button
         onClick={() => toggleWishlist(product.slug)}
-        className="mt-5 flex items-center gap-2 text-[13px] hover:opacity-60"
+        className="mt-3 flex h-11 items-center gap-2 text-[14px] active:opacity-50 lg:hover:opacity-60"
       >
         <svg
           viewBox="0 0 24 24"
@@ -204,22 +211,23 @@ export default function ProductInfo({ product }: { product: Product }) {
 
       {/* 하단 탭 */}
       <div className="mt-14">
-        <div className="flex gap-8 border-b border-neutral-200 text-[12px] tracking-[0.12em]">
+        <div className="flex gap-5 border-b border-neutral-200 text-[12px] tracking-[0.12em] sm:gap-8">
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`pb-3 ${
+              aria-pressed={tab === t}
+              className={`flex h-11 items-center active:opacity-60 ${
                 tab === t
                   ? "border-b border-black font-medium"
-                  : "text-neutral-400 hover:text-black"
+                  : "text-neutral-400 lg:hover:text-black"
               }`}
             >
               {t}
             </button>
           ))}
         </div>
-        <ul className="mt-5 space-y-1.5 text-[13px] leading-relaxed text-neutral-500">
+        <ul className="mt-5 space-y-2 text-[14px] leading-relaxed text-neutral-500 lg:text-[13px]">
           {TAB_CONTENT[tab].map((line) => (
             <li key={line}>{line}</li>
           ))}

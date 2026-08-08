@@ -31,11 +31,11 @@ export default function Gateway() {
         <div className="absolute inset-0 bg-black/25" />
       </div>
 
-      <p className="absolute left-6 top-6 text-[15px] text-white lg:left-10 lg:top-8">
+      <p className="absolute left-6 top-[calc(1.5rem+env(safe-area-inset-top))] text-[15px] text-white lg:left-10 lg:top-8">
         Honey Punch
       </p>
 
-      <div className="absolute inset-0 flex items-center justify-center px-6">
+      <div className="absolute inset-0 flex items-center justify-center px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
         {/* 모바일: 로고 아래 버튼 2개 / md 이상: 마뗑킴처럼 가로 한 줄 */}
         <div className="flex w-full max-w-[1100px] flex-col items-center gap-7 md:flex-row md:justify-center md:gap-8">
           <Link

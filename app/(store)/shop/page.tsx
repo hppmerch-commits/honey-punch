@@ -57,11 +57,15 @@ export default async function ShopPage({
           <p className="mt-2 text-[12px] text-neutral-400">{total}개의 상품</p>
         </div>
 
-        {/* 카테고리 필터 */}
-        <nav className="flex flex-wrap gap-x-5 gap-y-2 text-[12px]">
+        {/* 카테고리 필터 — 모바일에서는 가로 스크롤 칩, 각 항목 44px 터치 영역 */}
+        <nav className="-mx-6 flex gap-1 overflow-x-auto px-6 text-[13px] [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:px-0 lg:text-[12px] [&::-webkit-scrollbar]:hidden">
           <Link
             href="/shop"
-            className={!category && !q ? "text-black underline underline-offset-4" : "text-neutral-500 hover:text-black"}
+            className={`flex h-11 shrink-0 items-center px-3 active:opacity-50 ${
+              !category && !q
+                ? "text-black underline underline-offset-4"
+                : "text-neutral-500 lg:hover:text-black"
+            }`}
           >
             전체
           </Link>
@@ -69,11 +73,11 @@ export default async function ShopPage({
             <Link
               key={c.key}
               href={`/shop?category=${c.key}`}
-              className={
+              className={`flex h-11 shrink-0 items-center px-3 active:opacity-50 ${
                 category === c.key
                   ? "text-black underline underline-offset-4"
-                  : "text-neutral-500 hover:text-black"
-              }
+                  : "text-neutral-500 lg:hover:text-black"
+              }`}
             >
               {c.label}
             </Link>
@@ -94,9 +98,13 @@ export default async function ShopPage({
       )}
 
       {totalPages > 1 && (
-        <nav className="mt-16 flex items-center justify-center gap-4 text-[13px] text-neutral-400">
+        <nav className="mt-16 flex flex-wrap items-center justify-center gap-1 text-[14px] text-neutral-400">
           {page > 1 && (
-            <Link href={pageHref(page - 1)} className="hover:text-black">
+            <Link
+              href={pageHref(page - 1)}
+              aria-label="이전 페이지"
+              className="flex h-11 w-11 items-center justify-center active:opacity-50 lg:hover:text-black"
+            >
               &lsaquo;
             </Link>
           )}
@@ -104,17 +112,23 @@ export default async function ShopPage({
             <Link
               key={n}
               href={pageHref(n)}
-              className={
+              aria-label={`${n}페이지`}
+              aria-current={n === page ? "page" : undefined}
+              className={`flex h-11 w-11 items-center justify-center active:opacity-50 ${
                 n === page
-                  ? "text-black underline underline-offset-4"
-                  : "hover:text-black"
-              }
+                  ? "font-medium text-black underline underline-offset-4"
+                  : "lg:hover:text-black"
+              }`}
             >
               {n}
             </Link>
           ))}
           {page < totalPages && (
-            <Link href={pageHref(page + 1)} className="hover:text-black">
+            <Link
+              href={pageHref(page + 1)}
+              aria-label="다음 페이지"
+              className="flex h-11 w-11 items-center justify-center active:opacity-50 lg:hover:text-black"
+            >
               &rsaquo;
             </Link>
           )}

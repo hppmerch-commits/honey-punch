@@ -11,7 +11,7 @@ export default function LoginForm() {
 
   return (
     <form action={action} className="mt-10">
-      <label htmlFor="password" className="text-[12px] text-neutral-500">
+      <label htmlFor="password" className="text-[13px] text-neutral-500">
         관리자 비밀번호
       </label>
       <input
@@ -28,7 +28,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 h-12 w-full bg-black text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85 disabled:opacity-50"
+        className="mt-6 h-12 w-full bg-black text-[13px] tracking-[0.1em] text-white transition-opacity active:opacity-70 disabled:opacity-50 lg:hover:opacity-85"
       >
         {pending ? "확인 중…" : "로그인"}
       </button>

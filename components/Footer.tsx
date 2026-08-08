@@ -48,12 +48,12 @@ export default function Footer() {
             <p className="text-[11px] tracking-[0.16em] text-neutral-400">
               SHOP
             </p>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-2">
               {SHOP_LINKS.map((l) => (
                 <li key={l.label}>
                   <Link
                     href={l.href}
-                    className="text-[13px] text-neutral-600 transition-colors hover:text-black"
+                    className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
                   >
                     {l.label}
                   </Link>
@@ -67,11 +67,11 @@ export default function Footer() {
             <p className="text-[11px] tracking-[0.16em] text-neutral-400">
               INFORMATION
             </p>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-2">
               <li>
                 <Link
                   href="/campaign"
-                  className="text-[13px] text-neutral-600 transition-colors hover:text-black"
+                  className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
                 >
                   브랜드 스토리
                 </Link>
@@ -79,7 +79,7 @@ export default function Footer() {
               <li>
                 <button
                   onClick={() => setDoc(terms)}
-                  className="text-[13px] text-neutral-600 transition-colors hover:text-black"
+                  className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
                 >
                   이용약관
                 </button>
@@ -87,7 +87,7 @@ export default function Footer() {
               <li>
                 <button
                   onClick={() => setDoc(privacy)}
-                  className="text-[13px] font-medium text-neutral-800 transition-colors hover:text-black"
+                  className="flex min-h-11 items-center text-[14px] font-medium text-neutral-800 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
                 >
                   개인정보처리방침
                 </button>
@@ -95,7 +95,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-[13px] text-neutral-600 transition-colors hover:text-black"
+                  className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
                 >
                   고객센터
                 </a>
@@ -103,7 +103,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-[13px] text-neutral-600 transition-colors hover:text-black"
+                  className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
                 >
                   Instagram
                 </a>
@@ -113,11 +113,11 @@ export default function Footer() {
         </div>
 
         {/* 사업자 정보 */}
-        <div className="border-t border-neutral-100 px-6 py-8 lg:px-12">
+        <div className="border-t border-neutral-100 px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-8 lg:px-12">
           <p className="text-[12px] font-medium text-neutral-700">
             {business.name}
           </p>
-          <div className="mt-2.5 space-y-1 text-[11px] leading-relaxed text-neutral-400">
+          <div className="mt-2.5 space-y-1 text-[12px] leading-relaxed text-neutral-400 lg:text-[11px]">
             <p>{businessLine.join(" / ")}</p>
             <p>
               사업자등록번호 : {business.registrationNumber} / 개인정보보호책임자
@@ -125,7 +125,7 @@ export default function Footer() {
             </p>
             {business.email && <p>비즈니스 관련문의 : {business.email}</p>}
           </div>
-          <p className="mt-6 text-[11px] text-neutral-300">
+          <p className="mt-6 text-[12px] text-neutral-300 lg:text-[11px]">
             ⓒ HONEY PUNCH All rights reserved.
           </p>
         </div>

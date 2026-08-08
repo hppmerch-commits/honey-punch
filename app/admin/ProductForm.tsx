@@ -6,11 +6,12 @@ import Link from "next/link";
 import { CATEGORIES, type Product } from "@/lib/product-types";
 import type { FormState } from "./actions";
 
+// 모바일에서는 globals.css가 입력 글자를 16px로 올려 iOS 자동 확대를 막는다.
 const field =
-  "mt-1.5 h-11 w-full border border-neutral-300 px-3 text-[13px] outline-none focus:border-black";
+  "mt-1.5 h-12 w-full border border-neutral-300 px-3 text-[13px] outline-none focus:border-black lg:h-11";
 const area =
   "mt-1.5 w-full border border-neutral-300 p-3 text-[13px] leading-relaxed outline-none focus:border-black";
-const label = "text-[12px] text-neutral-600";
+const label = "text-[13px] text-neutral-600 lg:text-[12px]";
 
 export default function ProductForm({
   product,
@@ -150,7 +151,7 @@ export default function ProductForm({
       {/* 이미지 */}
       <div>
         <p className={label}>대표 이미지 *</p>
-        <div className="mt-2 flex items-start gap-5">
+        <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
           <div className="relative h-40 w-32 shrink-0 overflow-hidden border border-neutral-200 bg-[#f2f1ef]">
             {preview ? (
               <Image src={preview} alt="" fill sizes="128px" className="object-cover" />
@@ -169,7 +170,7 @@ export default function ProductForm({
                 const f = e.target.files?.[0];
                 if (f) setPreview(URL.createObjectURL(f));
               }}
-              className="w-full text-[12px] file:mr-3 file:border file:border-neutral-300 file:bg-white file:px-3 file:py-1.5 file:text-[12px]"
+              className="w-full text-[13px] file:mr-3 file:h-11 file:border file:border-neutral-300 file:bg-white file:px-4 file:text-[13px] file:active:bg-neutral-50"
             />
             <p className="mt-2 text-[11px] text-neutral-400">
               JPG·PNG·WEBP·AVIF·SVG, 최대 8MB. 업로드하지 않으면 아래 경로가 사용됩니다.
@@ -243,46 +244,46 @@ export default function ProductForm({
       </div>
 
       <div className="flex flex-wrap gap-6 border-t border-neutral-200 pt-6">
-        <label className="flex items-center gap-2 text-[13px]">
+        <label className="flex min-h-11 items-center gap-2.5 text-[14px] active:opacity-60">
           <input
             type="checkbox"
             name="published"
             defaultChecked={product?.published ?? true}
-            className="h-4 w-4"
+            className="h-5 w-5"
           />
           쇼핑몰에 노출
         </label>
-        <label className="flex items-center gap-2 text-[13px]">
+        <label className="flex min-h-11 items-center gap-2.5 text-[14px] active:opacity-60">
           <input
             type="checkbox"
             name="soldOut"
             defaultChecked={product?.soldOut ?? false}
-            className="h-4 w-4"
+            className="h-5 w-5"
           />
           품절 처리
         </label>
-        <label className="flex items-center gap-2 text-[13px]">
+        <label className="flex min-h-11 items-center gap-2.5 text-[14px] active:opacity-60">
           <input
             type="checkbox"
             name="campaignStory"
             defaultChecked={product?.campaignStory ?? false}
-            className="h-4 w-4"
+            className="h-5 w-5"
           />
           캠페인 스토리 배너 노출
         </label>
       </div>
 
-      <div className="flex gap-3 border-t border-neutral-200 pt-6">
+      <div className="flex flex-col gap-3 border-t border-neutral-200 pt-6 sm:flex-row">
         <button
           type="submit"
           disabled={pending}
-          className="h-12 bg-black px-10 text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85 disabled:opacity-50"
+          className="h-12 bg-black px-10 text-[13px] tracking-[0.1em] text-white transition-opacity active:opacity-70 disabled:opacity-50 lg:hover:opacity-85"
         >
           {pending ? "저장 중…" : submitLabel}
         </button>
         <Link
           href="/admin"
-          className="flex h-12 items-center border border-neutral-300 px-8 text-[12px] tracking-[0.1em] transition-colors hover:border-black"
+          className="flex h-12 items-center justify-center border border-neutral-300 px-8 text-[13px] tracking-[0.1em] transition-colors active:bg-neutral-50 lg:hover:border-black"
         >
           취소
         </Link>

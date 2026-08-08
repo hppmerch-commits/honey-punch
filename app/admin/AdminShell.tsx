@@ -16,7 +16,7 @@ export default function AdminShell({
         <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-5 sm:gap-6 sm:px-6">
           <Link
             href="/admin"
-            className="font-logo shrink-0 text-[17px] tracking-[0.06em] sm:text-[19px]"
+            className="font-logo flex h-11 shrink-0 items-center text-[17px] tracking-[0.06em] active:opacity-50 sm:text-[19px]"
           >
             Honey Punch
           </Link>
@@ -24,18 +24,21 @@ export default function AdminShell({
             ADMIN
           </span>
           <nav className="ml-auto flex items-center gap-4 text-[12px] sm:gap-5">
-            <Link href="/admin" className="text-neutral-600 hover:text-black">
+            <Link
+              href="/admin"
+              className="flex h-11 min-w-11 items-center justify-center text-neutral-600 active:opacity-50 lg:h-auto lg:min-w-0 lg:hover:text-black"
+            >
               상품
             </Link>
             <Link
               href="/"
               target="_blank"
-              className="hidden text-neutral-600 hover:text-black sm:inline"
+              className="hidden h-11 items-center text-neutral-600 active:opacity-50 sm:flex lg:h-auto lg:hover:text-black"
             >
               쇼핑몰 보기 ↗
             </Link>
             <form action={logoutAction}>
-              <button className="text-neutral-400 hover:text-black">
+              <button className="flex h-11 min-w-11 items-center justify-center text-neutral-400 active:opacity-50 lg:h-auto lg:min-w-0 lg:hover:text-black">
                 로그아웃
               </button>
             </form>

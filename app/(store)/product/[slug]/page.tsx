@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/queries";
+import { categoryLabel } from "@/lib/product-types";
 import ProductInfo from "@/components/ProductInfo";
 import BrailleDots from "@/components/BrailleDots";
 
@@ -45,15 +46,21 @@ export default async function ProductDetail({ params }: { params: Params }) {
 
       {/* 우측: 상품 정보 */}
       <div className="px-6 py-10 lg:sticky lg:top-16 lg:self-start lg:px-14 lg:py-16">
-        <p className="text-[12px] text-neutral-400">
-          <Link href="/shop" className="hover:text-black">
+        <nav className="-ml-2 flex items-center text-[13px] text-neutral-400 lg:ml-0 lg:text-[12px]">
+          <Link
+            href="/shop"
+            className="flex h-11 items-center px-2 active:opacity-50 lg:h-auto lg:px-0 lg:hover:text-black"
+          >
             Shop
-          </Link>{" "}
-          /{" "}
-          <Link href={`/shop?category=${product.category}`} className="hover:text-black">
-            {product.category}
           </Link>
-        </p>
+          <span aria-hidden="true">/</span>
+          <Link
+            href={`/shop?category=${product.category}`}
+            className="flex h-11 items-center px-2 active:opacity-50 lg:h-auto lg:pl-1 lg:pr-0 lg:hover:text-black"
+          >
+            {categoryLabel(product.category)}
+          </Link>
+        </nav>
 
         <ProductInfo product={product} />
 

@@ -20,13 +20,13 @@ export default async function AdminProductsPage() {
       action={
         <Link
           href="/admin/products/new"
-          className="flex h-11 items-center bg-black px-6 text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85"
+          className="flex h-12 items-center bg-black px-6 text-[13px] tracking-[0.1em] text-white transition-opacity active:opacity-70 lg:h-11 lg:text-[12px] lg:hover:opacity-85"
         >
           + 상품 등록
         </Link>
       }
     >
-      <div className="mb-6 flex gap-8 text-[12px] text-neutral-500">
+      <div className="mb-6 flex gap-6 text-[13px] text-neutral-500 sm:gap-8 lg:text-[12px]">
         <span>전체 <b className="text-black">{products.length}</b></span>
         <span>노출중 <b className="text-black">{visible}</b></span>
         <span>품절 <b className="text-black">{outOfStock}</b></span>
@@ -51,7 +51,7 @@ export default async function AdminProductsPage() {
                 <div className="min-w-0 flex-1">
                   <Link
                     href={`/admin/products/${p.id}`}
-                    className="block text-[13px] leading-snug hover:underline"
+                    className="flex min-h-11 items-center text-[14px] leading-snug active:opacity-50 lg:hover:underline"
                   >
                     {p.name}
                   </Link>
@@ -64,7 +64,7 @@ export default async function AdminProductsPage() {
                       <span className="ml-1.5 text-[11px] text-red-500">{rate}%</span>
                     )}
                   </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px]">
+                  <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-1 text-[13px]">
                     <span
                       className={`px-2 py-0.5 text-[11px] ${
                         sold
@@ -78,20 +78,20 @@ export default async function AdminProductsPage() {
                     </span>
                     <Link
                       href={`/admin/products/${p.id}`}
-                      className="text-neutral-600 hover:text-black"
+                      className="flex h-11 min-w-11 items-center justify-center text-neutral-600 active:opacity-50"
                     >
                       수정
                     </Link>
                     <form action={togglePublishedAction}>
                       <input type="hidden" name="id" value={p.id} />
                       <input type="hidden" name="next" value={String(!p.published)} />
-                      <button className="text-neutral-600 hover:text-black">
+                      <button className="flex h-11 min-w-11 items-center justify-center text-neutral-600 active:opacity-50">
                         {p.published ? "숨기기" : "노출"}
                       </button>
                     </form>
                     <form action={deleteProductAction}>
                       <input type="hidden" name="id" value={p.id} />
-                      <button className="text-neutral-400 hover:text-red-500">
+                      <button className="flex h-11 min-w-11 items-center justify-center text-neutral-400 active:text-red-500">
                         삭제
                       </button>
                     </form>

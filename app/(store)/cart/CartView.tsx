@@ -60,7 +60,7 @@ export default function CartView({ products }: { products: Product[] }) {
         {items.length > 0 && (
           <button
             onClick={clearCart}
-            className="text-[12px] text-neutral-400 hover:text-black"
+            className="-mr-2 flex h-11 items-center px-2 text-[13px] text-neutral-400 active:opacity-50 lg:hover:text-black"
           >
             전체 비우기
           </button>
@@ -105,14 +105,14 @@ export default function CartView({ products }: { products: Product[] }) {
                     <div className="flex items-start justify-between gap-3">
                       <Link
                         href={`/product/${item.slug}`}
-                        className="text-[13px] leading-snug hover:underline"
+                        className="flex min-h-11 items-center text-[14px] leading-snug active:opacity-50 lg:min-h-0 lg:text-[13px] lg:hover:underline"
                       >
                         {item.name}
                       </Link>
                       <button
                         onClick={() => removeFromCart(key)}
                         aria-label="상품 삭제"
-                        className="shrink-0 text-[12px] text-neutral-400 hover:text-black"
+                        className="-mr-3 flex h-11 min-w-11 shrink-0 items-center justify-center text-[13px] text-neutral-400 active:opacity-50 lg:hover:text-black"
                       >
                         삭제
                       </button>
@@ -126,17 +126,17 @@ export default function CartView({ products }: { products: Product[] }) {
                         <button
                           aria-label="수량 감소"
                           onClick={() => updateQty(key, item.qty - 1)}
-                          className="h-8 w-8 text-[14px] hover:bg-neutral-50 sm:h-9 sm:w-9"
+                          className="h-11 w-11 text-[16px] active:bg-neutral-100 lg:hover:bg-neutral-50"
                         >
                           −
                         </button>
-                        <span className="w-8 text-center text-[13px] sm:w-10">
+                        <span className="w-9 text-center text-[14px]">
                           {item.qty}
                         </span>
                         <button
                           aria-label="수량 증가"
                           onClick={() => updateQty(key, item.qty + 1)}
-                          className="h-8 w-8 text-[14px] hover:bg-neutral-50 sm:h-9 sm:w-9"
+                          className="h-11 w-11 text-[16px] active:bg-neutral-100 lg:hover:bg-neutral-50"
                         >
                           +
                         </button>
@@ -153,7 +153,7 @@ export default function CartView({ products }: { products: Product[] }) {
           </ul>
 
           {/* 결제 요약 */}
-          <aside className="mt-10 h-fit border border-neutral-200 p-7 lg:sticky lg:top-24 lg:mt-0">
+          <aside className="mt-10 h-fit border border-neutral-200 p-6 sm:p-7 lg:sticky lg:top-24 lg:mt-0">
             <h2 className="text-[13px] tracking-[0.12em]">ORDER SUMMARY</h2>
             <dl className="mt-6 space-y-3 text-[13px]">
               <div className="flex justify-between">

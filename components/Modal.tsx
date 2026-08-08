@@ -54,7 +54,7 @@ export default function Modal({
           <button
             onClick={onClose}
             aria-label="닫기"
-            className="-mr-1 -mt-1 p-1 text-neutral-400 transition-colors hover:text-black"
+            className="-mr-3 -mt-2 flex h-11 w-11 items-center justify-center text-neutral-400 transition-colors active:opacity-50 lg:hover:text-black"
           >
             <svg
               viewBox="0 0 24 24"
@@ -69,10 +69,10 @@ export default function Modal({
 
         <div className="overflow-y-auto px-6 py-7 sm:px-9">{children}</div>
 
-        <footer className="border-t border-neutral-200 px-6 py-4 sm:px-9">
+        <footer className="border-t border-neutral-200 px-6 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 sm:px-9 sm:pb-4">
           <button
             onClick={onClose}
-            className="h-11 w-full bg-black text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85"
+            className="h-12 w-full bg-black text-[13px] tracking-[0.1em] text-white transition-opacity active:opacity-70 lg:h-11 lg:hover:opacity-85"
           >
             확인
           </button>
