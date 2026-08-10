@@ -243,6 +243,26 @@ export default function ProductForm({
         />
       </div>
 
+      <div>
+        <label className={label} htmlFor="sizeChart">
+          사이즈표 (한 줄에 하나: 항목 + 사이즈별 치수)
+        </label>
+        <textarea
+          id="sizeChart"
+          name="sizeChart"
+          rows={6}
+          defaultValue={product?.sizeChart
+            .map((r) => `${r.label} ${r.values.join(" ")}`)
+            .join("\n")}
+          placeholder={"어깨 47 49 50\n가슴 55 57 59\n총장 67 71 72"}
+          className={area}
+        />
+        <p className="mt-1 text-[11px] text-neutral-400">
+          위 &quot;사이즈&quot; 칸에 적은 순서대로 치수를 띄어쓰기로 나열하세요. 단위 cm.
+          비워두면 SIZE GUIDE 탭에 표가 나오지 않습니다.
+        </p>
+      </div>
+
       <div className="flex flex-wrap gap-6 border-t border-neutral-200 pt-6">
         <label className="flex min-h-11 items-center gap-2.5 text-[14px] active:opacity-60">
           <input

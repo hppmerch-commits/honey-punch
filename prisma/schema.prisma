@@ -36,6 +36,10 @@ model Product {
   /// [{ name: "BLACK", hex: "#26262a" }, ...]
   colors Json @default("[]")
 
+  /// 실측 사이즈표. 열은 sizes와 같은 순서.
+  /// [{ label: "어깨", values: ["47", "49", "50"] }, ...]
+  sizeChart Json @default("[]")
+
   stock     Int     @default(0)
   soldOut   Boolean @default(false)
   /// false면 스토어프론트에 노출되지 않는다 (임시 저장용)

@@ -71,6 +71,23 @@ async function parseProductForm(formData: FormData) {
     return { name: m[1].trim(), hex: m[2] };
   });
 
+  const sizes = csv(formData.get("sizes"));
+
+  // 사이즈표: "어깨 47 49 50" 한 줄에 한 항목. 열 개수는 sizes와 맞춰야 한다.
+  const sizeChart = lines(formData.get("sizeChart")).map((line) => {
+    const parts = line.split(/[\s,]+/).filter(Boolean);
+    if (parts.length < 2) {
+      throw new Error(`사이즈표 형식이 잘못됐습니다: "${line}" (예: 어깨 47 49 50)`);
+    }
+    const [rowLabel, ...values] = parts;
+    if (sizes.length > 0 && values.length !== sizes.length) {
+      throw new Error(
+        `"${rowLabel}" 행의 치수가 ${values.length}개입니다. 사이즈(${sizes.join(", ")}) 개수인 ${sizes.length}개와 맞춰 주세요.`
+      );
+    }
+    return { label: rowLabel, values };
+  });
+
   // 이미지: 업로드가 있으면 그것을 쓰고, 없으면 입력된 경로를 유지
   const uploaded = formData.get("imageFile");
   let image = String(formData.get("image") ?? "").trim();
@@ -88,8 +105,9 @@ async function parseProductForm(formData: FormData) {
     category: String(formData.get("category") ?? "top"),
     image,
     description: lines(formData.get("description")),
-    sizes: csv(formData.get("sizes")),
+    sizes,
     colors,
+    sizeChart,
     stock: Math.round(stock),
     soldOut: formData.get("soldOut") === "on",
     published: formData.get("published") === "on",

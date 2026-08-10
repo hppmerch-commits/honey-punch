@@ -29,6 +29,7 @@ export async function register() {
         description: p.description,
         sizes: p.sizes,
         colors: p.colors,
+        sizeChart: p.sizeChart,
         stock: p.stock ?? 0,
         soldOut: p.soldOut ?? false,
         published: true,

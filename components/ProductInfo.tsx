@@ -12,29 +12,26 @@ import { useStore } from "./StoreProvider";
 
 const TABS = ["DELIVERY", "DETAILS", "SIZE GUIDE"] as const;
 
-const TAB_CONTENT: Record<(typeof TABS)[number], string[]> = {
+const TEXT_TABS: Record<"DELIVERY" | "DETAILS", string[]> = {
   DELIVERY: [
     "70,000원 이상 구매 시 무료배송 (미만 3,000원)",
     "오후 2시 이전 결제 완료 시 당일 출고",
     "출고 후 평균 1~3일 내 수령 (도서산간 제외)",
   ],
   DETAILS: [
-    "소재 : 상품 상세 설명 참고",
+    "소재 : 식물성 친환경 원단",
+    "왼쪽 소매 끝 실리콘 점자 패치",
     "제조국 : 한국",
     "세탁 시 단독 손세탁을 권장합니다.",
-  ],
-  "SIZE GUIDE": [
-    "S : 총장 68 / 가슴단면 58 / 소매길이 60",
-    "M : 총장 70 / 가슴단면 61 / 소매길이 62",
-    "L : 총장 72 / 가슴단면 64 / 소매길이 64",
   ],
 };
 
 export default function ProductInfo({ product }: { product: Product }) {
-  // 상품명과 일치하는 컬러(예: "... IN WHITE" → WHITE)를 기본 선택
+  // 상품명에 들어간 컬러를 기본 선택 ("...티셔츠 화이트" → 화이트, "... IN WHITE" → WHITE)
   const [color, setColor] = useState(() => {
+    const name = product.name.toUpperCase();
     const i = product.colors.findIndex((c) =>
-      product.name.toUpperCase().includes(`IN ${c.name.toUpperCase()}`)
+      name.includes(c.name.toUpperCase())
     );
     return i === -1 ? 0 : i;
   });
@@ -227,11 +224,65 @@ export default function ProductInfo({ product }: { product: Product }) {
             </button>
           ))}
         </div>
-        <ul className="mt-5 space-y-2 text-[14px] leading-relaxed text-neutral-500 lg:text-[13px]">
-          {TAB_CONTENT[tab].map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ul>
+        {tab === "SIZE GUIDE" ? (
+          product.sizeChart.length > 0 ? (
+            <div className="mt-5">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[280px] border-collapse text-[14px] lg:text-[13px]">
+                  <caption className="sr-only">
+                    {product.name} 실측 사이즈표 (단위 cm)
+                  </caption>
+                  <thead>
+                    <tr className="border-y border-neutral-200 text-neutral-400">
+                      <th scope="col" className="py-2.5 pr-3 text-left font-normal">
+                        구분
+                      </th>
+                      {product.sizes.map((s) => (
+                        <th
+                          key={s}
+                          scope="col"
+                          className="py-2.5 text-center font-normal"
+                        >
+                          {s}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {product.sizeChart.map((row) => (
+                      <tr key={row.label} className="border-b border-neutral-100">
+                        <th
+                          scope="row"
+                          className="py-2.5 pr-3 text-left font-normal text-neutral-500"
+                        >
+                          {row.label}
+                        </th>
+                        {product.sizes.map((s, i) => (
+                          <td key={s} className="py-2.5 text-center">
+                            {row.values[i] ?? "-"}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-4 text-[12px] leading-relaxed text-neutral-400">
+                단위 cm · 평면 실측이라 측정 방법에 따라 1~3cm 오차가 있을 수 있습니다.
+              </p>
+            </div>
+          ) : (
+            <p className="mt-5 text-[14px] text-neutral-400 lg:text-[13px]">
+              사이즈 정보가 준비 중입니다.
+            </p>
+          )
+        ) : (
+          <ul className="mt-5 space-y-2 text-[14px] leading-relaxed text-neutral-500 lg:text-[13px]">
+            {TEXT_TABS[tab].map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db";
-import type { Product, ProductColor } from "@/lib/product-types";
+import type { Product, ProductColor, SizeChartRow } from "@/lib/product-types";
 
 type Row = Awaited<ReturnType<typeof prisma.product.findFirst>>;
 
@@ -19,6 +19,9 @@ function toProduct(row: NonNullable<Row>): Product {
     description: row.description,
     sizes: row.sizes,
     colors: Array.isArray(row.colors) ? (row.colors as ProductColor[]) : [],
+    sizeChart: Array.isArray(row.sizeChart)
+      ? (row.sizeChart as SizeChartRow[])
+      : [],
     stock: row.stock,
     soldOut: row.soldOut,
     published: row.published,

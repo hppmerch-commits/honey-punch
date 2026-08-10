@@ -13,6 +13,9 @@ export const categoryLabel = (key: string) =>
 
 export type ProductColor = { name: string; hex: string };
 
+/** 실측 사이즈표의 한 행. values 순서는 Product.sizes와 같다. */
+export type SizeChartRow = { label: string; values: string[] };
+
 /** 화면에서 쓰는 상품 형태 — Prisma 레코드를 이 형태로 정규화해서 넘긴다. */
 export type Product = {
   id: string;
@@ -27,6 +30,7 @@ export type Product = {
   description: string[];
   sizes: string[];
   colors: ProductColor[];
+  sizeChart: SizeChartRow[];
   stock: number;
   soldOut: boolean;
   published: boolean;
