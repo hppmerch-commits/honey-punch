@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import BrailleDots from "@/components/BrailleDots";
+import TemplateHero from "@/components/template/TemplateHero";
+import TemplateBrandFooter from "@/components/template/TemplateBrandFooter";
 import { listCampaignProducts } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +77,10 @@ export default async function CampaignPage() {
 
   return (
     <main>
+      {/* ── '허니펀치 참고' 템플릿에서 가져온 섹션 (원본 그대로, 변형 예정) ── */}
+      <TemplateHero />
+      <TemplateBrandFooter />
+
       {/* ① 히어로 */}
       <section className="relative flex h-[calc(100dvh-4rem)] min-h-[480px] items-center justify-center overflow-hidden">
         <Image

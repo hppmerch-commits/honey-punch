@@ -53,3 +53,6 @@ next-env.d.ts
 /.windsurf
 /.claude/skills
 /skills-lock.json
+
+# 참고용 템플릿 원본 (앱 코드가 아님)
+/_reference-template

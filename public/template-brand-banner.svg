@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 560" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="base" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#9fd8f2"/>
+      <stop offset="0.45" stop-color="#bce6f7"/>
+      <stop offset="1" stop-color="#eaf7fd"/>
+    </linearGradient>
+    <linearGradient id="ray" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ray2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#d8f1fb" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+  </defs>
+
+  <rect width="1800" height="560" fill="url(#base)"/>
+
+  <!-- 부드럽게 흐르는 광선 곡선 -->
+  <g filter="url(#soft)">
+    <path d="M-100,430 C300,300 620,470 980,330 C1250,225 1500,300 1900,190" stroke="url(#ray)" stroke-width="70" fill="none"/>
+    <path d="M-100,520 C260,420 640,560 1020,430 C1320,325 1560,400 1900,300" stroke="url(#ray2)" stroke-width="46" fill="none"/>
+    <path d="M-100,300 C280,210 560,340 940,230 C1240,145 1520,205 1900,110" stroke="url(#ray)" stroke-width="34" fill="none" opacity="0.8"/>
+    <ellipse cx="1480" cy="120" rx="520" ry="200" fill="#ffffff" opacity="0.45"/>
+    <ellipse cx="240" cy="90" rx="380" ry="160" fill="#ffffff" opacity="0.28"/>
+  </g>
+</svg>
