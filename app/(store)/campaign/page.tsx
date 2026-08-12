@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import BrailleDots from "@/components/BrailleDots";
 import TemplateHero from "@/components/template/TemplateHero";
-import TemplateBrandFooter from "@/components/template/TemplateBrandFooter";
 import { listCampaignProducts } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -77,9 +76,8 @@ export default async function CampaignPage() {
 
   return (
     <main>
-      {/* ── '허니펀치 참고' 템플릿에서 가져온 섹션 (원본 그대로, 변형 예정) ── */}
+      {/* ── 참고 템플릿 Hero 레이아웃에 허니펀치 내용을 담은 섹션 ── */}
       <TemplateHero />
-      <TemplateBrandFooter />
 
       {/* ① 히어로 */}
       <section className="relative flex h-[calc(100dvh-4rem)] min-h-[480px] items-center justify-center overflow-hidden">
@@ -111,7 +109,7 @@ export default async function CampaignPage() {
       </section>
 
       {/* ② Prologue */}
-      <section className="mx-auto max-w-[640px] px-6 pt-28">
+      <section id="prologue" className="mx-auto max-w-[640px] px-6 pt-28">
         <p className="text-[11px] tracking-[0.3em] text-neutral-400">PROLOGUE</p>
         <h2 className="font-logo mt-8 text-[clamp(24px,3.2vw,36px)] leading-snug">
           "오늘 무슨 색 옷을 입을까?"

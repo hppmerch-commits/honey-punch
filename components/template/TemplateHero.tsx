@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import dynamic from "next/dynamic";
-import DemoDialog from "./DemoDialog";
 import { AddLine, ArrowDownLine, ArrowRightLine } from "./icons";
 
 // WebGL 캔버스라 서버 렌더링을 건너뛴다.
@@ -12,11 +10,10 @@ const Dither = dynamic(() => import("./Dither/Dither"), {
 });
 
 /**
- * '허니펀치 참고' 템플릿의 home/components/Hero.tsx 를 그대로 옮긴 섹션.
- * 문구·레이아웃은 원본 유지. 변형은 이후 단계에서 진행한다.
+ * '허니펀치 참고' 템플릿의 home/components/Hero.tsx 레이아웃에
+ * 허니펀치 캠페인 내용을 담은 섹션. 레이아웃·장식은 원본 유지.
  */
 export default function TemplateHero() {
-  const [demoOpen, setDemoOpen] = useState(false);
   return (
     <section
       id="hero"
@@ -36,7 +33,7 @@ export default function TemplateHero() {
 
           {/* Brand title */}
           <h1 className="font-serif text-[3.5rem] md:text-[5rem] lg:text-[6.25rem] xl:text-[7.25rem] font-light tracking-tight text-slate-900 leading-[0.9] select-none whitespace-nowrap text-right ml-auto">
-            Nexus<span className="text-blue-600">.</span>OS
+            Honey Punch<span className="text-blue-600">.</span>
           </h1>
         </div>
 
@@ -83,14 +80,14 @@ export default function TemplateHero() {
               </span>
             </div>
             <span className="absolute bottom-2.5 md:bottom-3 left-6 md:left-8 text-[9px] tracking-[0.35em] text-slate-500 font-mono uppercase">
-              NX · 001
+              HP · 001
             </span>
           </div>
 
           {/* BOTTOM-RIGHT notch decoration */}
           <div className="absolute bottom-0 right-0 w-36 md:w-48 lg:w-56 h-16 md:h-20 lg:h-24 z-[3] pointer-events-none">
             <span className="absolute top-2.5 md:top-3 right-6 md:right-8 text-[9px] tracking-[0.35em] text-slate-500 font-mono uppercase">
-              REL · Q2/26
+              SS · 26
             </span>
             <div className="absolute bottom-4 md:bottom-5 lg:bottom-6 right-6 md:right-8 flex items-center gap-2.5">
               <span className="grid grid-cols-3 gap-[3px]">
@@ -121,38 +118,33 @@ export default function TemplateHero() {
 
           {/* Left-aligned content — vertically centered */}
           <div className="absolute top-1/2 -translate-y-1/2 left-8 md:left-14 lg:left-20 z-10 max-w-[560px]">
-            {/* Small eyebrow — same system as other sections */}
             <p className="text-[11px] tracking-[0.3em] uppercase text-blue-700 font-mono mb-5 md:mb-6">
               <span className="inline-block w-6 h-px bg-blue-700/70 align-middle mr-3"></span>
-              Intelligence Layer
+              Universal Design
             </p>
 
-            {/* Slogan — unified serif (Cormorant Garamond), bold to match subpage titles */}
             <p className="font-serif text-[2rem] md:text-[2.5rem] lg:text-[2.75rem] leading-[1.15] text-slate-950 font-bold tracking-tight">
-              Your Journey to a Digital Future.
+              손끝으로 고르는 오늘의 기분.
               <br />
-              Our Intelligence Layer,
+              보이지 않아도 스스로 고르는,
               <br />
-              Tailored to Your Needs.
+              허니펀치 유니버셜디자인.
             </p>
 
-            <button
-              type="button"
-              onClick={() => setDemoOpen(true)}
+            <a
+              href="#prologue"
               className="group mt-8 md:mt-10 inline-flex items-center gap-3 cursor-pointer pointer-events-auto"
             >
               <span className="w-12 h-12 rounded-full border border-slate-900 flex items-center justify-center transition-all group-hover:bg-slate-900 group-hover:scale-110">
                 <ArrowRightLine className="w-5 h-5 text-slate-900 group-hover:text-white transition-colors" />
               </span>
               <span className="text-[15px] text-slate-900 tracking-wide group-hover:translate-x-1 transition-transform">
-                Book a Demo
+                스토리 보기
               </span>
-            </button>
+            </a>
           </div>
         </div>
       </div>
-
-      <DemoDialog open={demoOpen} onClose={() => setDemoOpen(false)} />
     </section>
   );
 }
