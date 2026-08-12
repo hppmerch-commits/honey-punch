@@ -11,9 +11,17 @@
   --font-logo: var(--font-prata), Georgia, serif;
 
   /* '허니펀치 참고' 템플릿이 쓰는 서체 (tailwind.config.ts의 serif/mono와 동일) */
-  --font-serif: var(--font-cormorant), "Times New Roman", serif;
+  --font-serif: var(--font-cormorant), var(--font-gowun-batang),
+    "Times New Roman", serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo,
     monospace;
+
+  /*
+   * 한글이 주가 되는 제목용. Cormorant는 한글 글리프가 없어 "3cm의 다리(Bridge)"
+   * 처럼 섞인 제목에서 서체가 튄다. 라틴까지 커버하는 명조를 앞에 둔다.
+   */
+  --font-hangul: var(--font-gowun-batang), var(--font-cormorant),
+    "Times New Roman", serif;
 }
 
 html {
@@ -88,6 +96,21 @@ body {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
+}
+
+/*
+ * 캠페인 페이지는 블루 액센트를 쓰는 별도 표면이라,
+ * 브라우저가 기본으로 그리는 부분(선택 영역·포커스 링)도 그 팔레트로 맞춘다.
+ */
+.campaign-surface ::selection {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.campaign-surface :focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 /* 스크롤 유도 화살표 — 튕기지 않고 부드럽게 감속하며 내려갔다 돌아온다 */
