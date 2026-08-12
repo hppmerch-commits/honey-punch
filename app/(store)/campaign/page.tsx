@@ -79,36 +79,7 @@ export default async function CampaignPage() {
       {/* ── 참고 템플릿 Hero 레이아웃에 허니펀치 내용을 담은 섹션 ── */}
       <TemplateHero />
 
-      {/* ① 히어로 */}
-      <section className="relative flex h-[calc(100dvh-4rem)] min-h-[480px] items-center justify-center overflow-hidden">
-        <Image
-          src="/campaign-hero.svg"
-          alt=""
-          fill
-          priority
-          className="object-cover"
-        />
-        <div className="relative px-6 text-center">
-          <p className="text-[11px] tracking-[0.3em] text-[#8a6d24]">
-            HONEY PUNCH CAMPAIGN
-          </p>
-          <h1 className="font-logo mt-6 text-[clamp(30px,4.6vw,58px)] leading-[1.25] text-neutral-900">
-            손끝으로 고르는
-            <br />
-            오늘의 기분
-          </h1>
-          <p className="mt-6 text-[13px] tracking-wide text-neutral-600">
-            허니펀치 '점자 패치 티셔츠' 스토리
-          </p>
-        </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-neutral-500" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" className="h-5 w-5 stroke-current">
-            <path d="M12 4v16m0 0-6-6m6 6 6-6" />
-          </svg>
-        </div>
-      </section>
-
-      {/* ② Prologue */}
+      {/* ① Prologue */}
       <section id="prologue" className="mx-auto max-w-[640px] px-6 pt-28">
         <p className="text-[11px] tracking-[0.3em] text-neutral-400">PROLOGUE</p>
         <h2 className="font-logo mt-8 text-[clamp(24px,3.2vw,36px)] leading-snug">
@@ -138,7 +109,7 @@ export default async function CampaignPage() {
 
       <DotDivider />
 
-      {/* ③ Step 1~4 — 지그재그 */}
+      {/* ② Step 1~4 — 지그재그 */}
       <section id="steps" className="mx-auto max-w-[1080px] space-y-28 px-6">
         {STEPS.map((step, i) => (
           <div
@@ -172,7 +143,7 @@ export default async function CampaignPage() {
         ))}
       </section>
 
-      {/* ④ 소매 클로즈업 풀폭 */}
+      {/* ③ 소매 클로즈업 풀폭 */}
       <div className="mt-28">
         <Image
           src="/campaign-sleeve.svg"
@@ -183,7 +154,7 @@ export default async function CampaignPage() {
         />
       </div>
 
-      {/* ⑤ Epilogue — 블랙 반전 */}
+      {/* ④ Epilogue — 블랙 반전 */}
       <section id="epilogue" className="bg-black px-6 py-32 text-white">
         <div className="mx-auto max-w-[640px]">
           <p className="text-[11px] tracking-[0.3em] text-neutral-500">
@@ -220,7 +191,7 @@ export default async function CampaignPage() {
         </div>
       </section>
 
-      {/* ⑥ CTA */}
+      {/* ⑤ CTA */}
       <section id="cta" className="px-6 pb-8 pt-28 text-center">
         <div className="flex justify-center gap-4" aria-hidden="true">
           <BrailleDots dots={[1, 2]} dotClassName="bg-[#d9a715]" emptyClassName="bg-neutral-100" />

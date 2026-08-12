@@ -90,6 +90,24 @@ body {
   }
 }
 
+/* 스크롤 유도 화살표 — 튕기지 않고 부드럽게 감속하며 내려갔다 돌아온다 */
+@keyframes nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 1;
+  }
+}
+
+.animate-nudge-down {
+  /* ease-out-quint */
+  animation: nudge-down 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
 .animate-fade-in-dialog {
   animation: fade-in-dialog 0.3s ease-out forwards;
 }
@@ -100,7 +118,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-dialog,
-  .animate-slide-up-overlay {
+  .animate-slide-up-overlay,
+  .animate-nudge-down {
     animation: none;
   }
 }

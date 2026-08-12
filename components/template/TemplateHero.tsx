@@ -28,7 +28,7 @@ export default function TemplateHero() {
               Scroll Down
             </span>
             <span className="block h-px w-12 lg:w-16 bg-slate-500/60"></span>
-            <ArrowDownLine className="w-4 h-4 text-slate-600 animate-bounce" />
+            <ArrowDownLine className="w-4 h-4 text-slate-600 animate-nudge-down" />
           </div>
 
           {/* Brand title */}
