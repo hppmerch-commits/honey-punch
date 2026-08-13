@@ -77,6 +77,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/about"
+                  className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
+                >
+                  회사소개
+                </Link>
+              </li>
+              <li>
                 <button
                   onClick={() => setDoc(terms)}
                   className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"

@@ -45,6 +45,13 @@ export default function Gateway() {
             Campaign
           </Link>
 
+          <Link
+            href="/about"
+            className="hidden shrink-0 border border-white px-8 py-3 text-[15px] text-white transition-colors hover:bg-white hover:text-black md:block"
+          >
+            History
+          </Link>
+
           <h1 className="font-logo text-center text-[clamp(38px,11vw,88px)] leading-none text-white md:whitespace-nowrap md:px-2">
             Honey Punch
           </h1>
@@ -63,6 +70,12 @@ export default function Gateway() {
               className="flex h-12 flex-1 items-center justify-center border border-white text-[14px] text-white active:bg-white active:text-black"
             >
               Campaign
+            </Link>
+            <Link
+              href="/about"
+              className="flex h-12 flex-1 items-center justify-center border border-white text-[14px] text-white active:bg-white active:text-black"
+            >
+              History
             </Link>
             <Link
               href="/shop"
