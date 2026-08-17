@@ -16,3 +16,25 @@ export const business = {
   /** 비즈니스 문의 이메일 */
   email: "",
 } as const;
+
+// 배송 정책 — 장바구니·체크아웃·주문 생성에서 공통으로 참조
+export const shipping = {
+  /** 이 금액 이상이면 무료배송 (원) */
+  freeFrom: 70000,
+  /** 기본 배송비 (원) */
+  fee: 3000,
+} as const;
+
+/**
+ * 무통장입금 계좌 — 채우면 주문 완료 페이지와 관리자 상세에 노출됩니다.
+ * 빈 값이면 "주문 확인 연락 시 안내" 문구로 대체됩니다.
+ * 예: bank: "카카오뱅크", account: "3333-00-0000000", holder: "양동준(허니펀치)"
+ */
+export const bankTransfer = {
+  bank: "",
+  account: "",
+  holder: "",
+} as const;
+
+export const hasBankInfo = () =>
+  Boolean(bankTransfer.bank && bankTransfer.account);

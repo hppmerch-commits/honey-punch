@@ -31,6 +31,12 @@ export default function AdminShell({
               상품
             </Link>
             <Link
+              href="/admin/orders"
+              className="flex h-11 min-w-11 items-center justify-center text-neutral-600 active:opacity-50 lg:h-auto lg:min-w-0 lg:hover:text-black"
+            >
+              주문
+            </Link>
+            <Link
               href="/"
               target="_blank"
               className="hidden h-11 items-center text-neutral-600 active:opacity-50 sm:flex lg:h-auto lg:hover:text-black"

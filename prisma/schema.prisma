@@ -57,3 +57,62 @@ model Product {
   @@index([category, published])
   @@index([sortOrder])
 }
+
+model Order {
+  id String @id @default(cuid())
+
+  /// 고객에게 노출되는 주문번호 (예: HP-20260818-3F7K)
+  orderNumber String @unique
+
+  /// PENDING(입금대기) | PAID(결제확인) | SHIPPED(배송중) | DONE(배송완료) | CANCELLED(취소)
+  status String @default("PENDING")
+
+  customerName String
+  phone        String
+  email        String @default("")
+
+  postcode String @default("")
+  address1 String
+  address2 String @default("")
+  /// 배송 요청사항
+  memo     String @default("")
+
+  /// 주문 시점 금액 스냅샷 (원)
+  subtotal    Int
+  shippingFee Int
+  total       Int
+
+  /// 현재는 무통장입금만 지원. PG 연동 시 확장.
+  paymentMethod String    @default("BANK_TRANSFER")
+  paidAt        DateTime?
+
+  courier        String @default("")
+  trackingNumber String @default("")
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([phone])
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// 주문 시점 스냅샷 — 상품이 수정/삭제돼도 주문 기록은 남는다.
+  productId String?
+  slug      String
+  name      String
+  image     String
+  size      String @default("")
+  color     String @default("")
+  unitPrice Int
+  qty       Int
+
+  @@index([orderId])
+}

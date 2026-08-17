@@ -4,10 +4,11 @@ import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { won, isSoldOut, type Product } from "@/lib/product-types";
+import { shipping } from "@/lib/site";
 import { useStore, itemKey } from "@/components/StoreProvider";
 
-const FREE_SHIPPING_FROM = 70000;
-const SHIPPING_FEE = 3000;
+const FREE_SHIPPING_FROM = shipping.freeFrom;
+const SHIPPING_FEE = shipping.fee;
 
 export default function CartView({ products }: { products: Product[] }) {
   const { cart, updateQty, removeFromCart, clearCart, ready } = useStore();
@@ -177,13 +178,12 @@ export default function CartView({ products }: { products: Product[] }) {
               </span>
             </div>
 
-            <button
-              disabled
-              title="결제 연동 준비 중입니다"
-              className="mt-7 h-13 w-full cursor-not-allowed bg-neutral-200 py-4 text-[12px] tracking-[0.1em] text-neutral-500"
+            <Link
+              href="/checkout"
+              className="mt-7 flex h-13 w-full items-center justify-center bg-black py-4 text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85"
             >
-              주문하기 (결제 연동 예정)
-            </button>
+              주문하기
+            </Link>
             <Link
               href="/shop"
               className="mt-3 flex h-12 w-full items-center justify-center border border-neutral-300 text-[12px] tracking-[0.1em] transition-colors hover:border-black"
