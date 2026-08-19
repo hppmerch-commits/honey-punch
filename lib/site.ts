@@ -31,9 +31,9 @@ export const shipping = {
  * 예: bank: "카카오뱅크", account: "3333-00-0000000", holder: "양동준(허니펀치)"
  */
 export const bankTransfer = {
-  bank: "",
-  account: "",
-  holder: "",
+  bank: "기업은행",
+  account: "298-109704-01-011",
+  holder: "양동준(허니펀치)",
 } as const;
 
 export const hasBankInfo = () =>

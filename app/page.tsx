@@ -36,54 +36,27 @@ export default function Gateway() {
       </p>
 
       <div className="absolute inset-0 flex items-center justify-center px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
-        {/* 모바일: 로고 아래 버튼 2개 / md 이상: 마뗑킴처럼 가로 한 줄 */}
-        <div className="flex w-full max-w-[1100px] flex-col items-center gap-7 md:flex-row md:justify-center md:gap-8">
-          <Link
-            href="/campaign"
-            className="hidden shrink-0 border border-white px-8 py-3 text-[15px] text-white transition-colors hover:bg-white hover:text-black md:block"
-          >
-            Campaign
-          </Link>
-
-          <Link
-            href="/about"
-            className="hidden shrink-0 border border-white px-8 py-3 text-[15px] text-white transition-colors hover:bg-white hover:text-black md:block"
-          >
-            History
-          </Link>
-
+        {/* 로고 아래 Campaign · History · Shop 한 줄 — 모바일/PC 동일 구조 */}
+        <div className="flex w-full flex-col items-center gap-7 md:gap-9">
           <h1 className="font-logo text-center text-[clamp(38px,11vw,88px)] leading-none text-white md:whitespace-nowrap md:px-2">
             Honey Punch
           </h1>
 
-          <Link
-            href="/shop"
-            className="hidden shrink-0 border border-white px-8 py-3 text-[15px] text-white transition-colors hover:bg-white hover:text-black md:block"
-          >
-            Shop
-          </Link>
-
-          {/* 모바일 전용 버튼 행 */}
-          <div className="flex w-full max-w-[340px] gap-3 md:hidden">
-            <Link
-              href="/campaign"
-              className="flex h-12 flex-1 items-center justify-center border border-white text-[14px] text-white active:bg-white active:text-black"
-            >
-              Campaign
-            </Link>
-            <Link
-              href="/about"
-              className="flex h-12 flex-1 items-center justify-center border border-white text-[14px] text-white active:bg-white active:text-black"
-            >
-              History
-            </Link>
-            <Link
-              href="/shop"
-              className="flex h-12 flex-1 items-center justify-center border border-white text-[14px] text-white active:bg-white active:text-black"
-            >
-              Shop
-            </Link>
-          </div>
+          <nav className="flex w-full max-w-[340px] gap-3 md:max-w-none md:justify-center md:gap-5">
+            {[
+              { label: "Campaign", href: "/campaign" },
+              { label: "History", href: "/about" },
+              { label: "Shop", href: "/shop" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex h-12 flex-1 items-center justify-center border border-white text-[14px] text-white transition-colors active:bg-white active:text-black md:h-auto md:flex-none md:px-10 md:py-3 md:text-[15px] md:hover:bg-white md:hover:text-black"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </main>
