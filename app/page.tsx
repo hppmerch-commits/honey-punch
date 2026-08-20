@@ -32,7 +32,7 @@ export default function Gateway() {
       </div>
 
       <p className="absolute left-6 top-[calc(1.5rem+env(safe-area-inset-top))] text-[15px] text-white lg:left-10 lg:top-8">
-        Honey Punch
+        Honey Punch Project
       </p>
 
       <div className="absolute inset-0 flex items-center justify-center px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">

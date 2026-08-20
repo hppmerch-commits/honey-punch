@@ -12,17 +12,42 @@ import { useStore } from "./StoreProvider";
 
 const TABS = ["DELIVERY", "DETAILS", "SIZE GUIDE"] as const;
 
-const TEXT_TABS: Record<"DELIVERY" | "DETAILS", string[]> = {
+type InfoGroup = { label?: string; lines: string[] };
+
+const TEXT_TABS: Record<"DELIVERY" | "DETAILS", InfoGroup[]> = {
   DELIVERY: [
-    "70,000원 이상 구매 시 무료배송 (미만 3,000원)",
-    "오후 2시 이전 결제 완료 시 당일 출고",
-    "출고 후 평균 1~3일 내 수령 (도서산간 제외)",
+    {
+      lines: [
+        "9월까지 무료배송 이벤트",
+        "결제 완료 후 배송 4~7일 소요",
+        "출고 후 1~3일 내 수령",
+      ],
+    },
   ],
   DETAILS: [
-    "소재 : 식물성 친환경 원단",
-    "왼쪽 소매 끝 실리콘 점자 패치",
-    "제조국 : 한국",
-    "세탁 시 단독 손세탁을 권장합니다.",
+    {
+      label: "소재",
+      lines: [
+        "식물성 친환경 기능성 원단(소로나) 함유",
+        "알레르기 케어가 가능하며 통풍이 잘되고 흡습성이 좋음",
+        "세탁 후 수축 안정화 및 구김이 적고 형태 변형율이 낮음",
+        "30수를 사용하여 촉감이 부드럽고 탄탄하면서도 유연한 소재",
+        "우수한 보풀 방지 성능",
+      ],
+    },
+    {
+      label: "디테일",
+      lines: [
+        "왼쪽 소매 끝에 시각장애인들도 색상을 확인할 수 있는 색상 점자 패치 삽입",
+        "정사이즈보다 약간 루즈한 세미 오버핏. 남녀노소 연령대를 불문하고 착용 가능한 베이직 핏",
+        "소매 길이를 일반적인 반팔보다 길게 하여 팔뚝 보완에 용이",
+        "어깨부터 암홀, 밑단까지 스트레이트로 떨어지는 일자핏으로 깔끔한 실루엣",
+      ],
+    },
+    {
+      label: "제조국",
+      lines: ["Design Korea, Made in China (중국 국가 표준 브랜드 제품 요구사항 준수)"],
+    },
   ],
 };
 
@@ -277,11 +302,26 @@ export default function ProductInfo({ product }: { product: Product }) {
             </p>
           )
         ) : (
-          <ul className="mt-5 space-y-2 text-[14px] leading-relaxed text-neutral-500 lg:text-[13px]">
-            {TEXT_TABS[tab].map((line) => (
-              <li key={line}>{line}</li>
+          <div className="mt-5 space-y-6">
+            {TEXT_TABS[tab].map((group, gi) => (
+              <div key={group.label ?? gi}>
+                {group.label && (
+                  <p className="text-[11px] tracking-[0.16em] text-neutral-400">
+                    {group.label}
+                  </p>
+                )}
+                <ul
+                  className={`space-y-2 text-[14px] leading-relaxed text-neutral-500 lg:text-[13px] ${
+                    group.label ? "mt-2" : ""
+                  }`}
+                >
+                  {group.lines.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>
