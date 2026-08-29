@@ -25,8 +25,13 @@
 }
 
 html {
-  /* 가로 스크롤 원천 차단 + iOS에서 회전 시 글자 크기 자동 확대 방지 */
-  overflow-x: hidden;
+  /*
+   * 가로 스크롤 원천 차단 + iOS에서 회전 시 글자 크기 자동 확대 방지.
+   * hidden이 아닌 clip을 쓰는 이유: hidden은 스크롤 컨테이너를 만들어
+   * 하위의 position: sticky(상품 구매 컬럼·장바구니 요약)를 전부 죽인다.
+   * clip은 넘침만 잘라내고 스크롤 컨테이너를 만들지 않는다.
+   */
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -36,7 +41,7 @@ body {
   font-family: "Helvetica Neue", Helvetica, Arial, "Apple SD Gothic Neo",
     Pretendard, "Malgun Gothic", sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* 터치 기기: 탭 지연 제거, 회색 하이라이트 제거 */
