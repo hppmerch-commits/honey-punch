@@ -134,8 +134,14 @@ export default function AboutPage() {
           <p className="text-[11px] tracking-[0.16em] text-neutral-400">
             WORKS
           </p>
+          {/* 두 열의 항목 수가 비슷하게(9:9) 묶어서 아래쪽이 비지 않게 한다 */}
           <div className="mt-4 grid gap-x-10 gap-y-10 sm:grid-cols-2">
-            {WORKS.map((group) => (
+            {[
+              [WORKS[0], WORKS[3]],
+              [WORKS[1], WORKS[2]],
+            ].map((column, ci) => (
+              <div key={ci} className="space-y-10">
+                {column.map((group) => (
               <div key={group.label}>
                 <h2 className="border-b border-neutral-800 pb-2 text-[12px] tracking-[0.14em] text-neutral-800">
                   {group.label}
@@ -155,6 +161,8 @@ export default function AboutPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+                ))}
               </div>
             ))}
           </div>
