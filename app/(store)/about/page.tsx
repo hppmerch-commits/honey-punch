@@ -8,12 +8,8 @@ export const metadata = {
 };
 
 // 연혁 — 연도가 확정된 이정표만. 연도 없는 활동은 아래 WORKS에 분야별로 둔다.
+// 최신이 위로 오도록 역순 정렬.
 const HISTORY = [
-  { year: "2016", items: ["한국–베트남 문화예술교육 공적개발원조(ODA) 사업 운영"] },
-  { year: "2019", items: ["영화 〈느릿느릿 달팽이 라디오〉 제작"] },
-  { year: "2022", items: ["영화 〈영화감독 노동주〉 제작 지원"] },
-  { year: "2023", items: ["대한민국예술교육대상 문화체육관광부장관 표창"] },
-  { year: "2025", items: ["KBS 〈빌런의 나라〉 제작 참여"] },
   {
     year: "2026",
     items: [
@@ -21,18 +17,66 @@ const HISTORY = [
       "공식 온라인 스토어 오픈",
     ],
   },
+  { year: "2025", items: ["KBS 〈빌런의 나라〉 제작 참여"] },
+  { year: "2023", items: ["대한민국예술교육대상 문화체육관광부장관 표창"] },
+  { year: "2022", items: ["영화 〈영화감독 노동주〉 제작 지원"] },
+  { year: "2019", items: ["영화 〈느릿느릿 달팽이 라디오〉 제작"] },
+  { year: "2016", items: ["한국–베트남 문화예술교육 공적개발원조(ODA) 사업 운영"] },
 ];
 
-// 활동 — 분야별. title은 본문, meta는 연도·주관·상태 같은 부가 정보.
-const WORKS: { label: string; items: { title: string; meta?: string }[] }[] = [
+// 활동 — 분야별. title은 본문, meta는 연도·주관·상태, notes는 수상·상영 이력.
+const WORKS: {
+  label: string;
+  items: { title: string; meta?: string; notes?: string[] }[];
+}[] = [
   {
     label: "FILM & DOCUMENTARY",
     items: [
-      { title: "〈느릿느릿 달팽이 라디오〉", meta: "2019 · 영화 제작" },
-      { title: "〈영화감독 노동주〉", meta: "2022 · 영화 제작 지원" },
+      {
+        title: "〈느릿느릿 달팽이 라디오〉",
+        meta: "2019 · 영화 제작",
+        notes: [
+          "미디어방송대상 최우수상",
+          "서울장애인인권영화제 폐막작",
+          "가치봄영화제 장애인미디어운동부문 상영",
+          "제주국제인권영화제 상영",
+          "광주독립영화제 다큐멘터리 신작선",
+        ],
+      },
+      {
+        title: "〈영화감독 노동주〉",
+        meta: "2022.11.30 개봉 · 제작 지원",
+        notes: [
+          "DMZ국제다큐멘터리영화제 한국쇼케이스",
+          "마드리드국제영화제 비경쟁 상영",
+          "영국 라스트하울국제영화제 초청",
+        ],
+      },
       { title: "〈빌런의 나라〉", meta: "2025 · KBS · 제작 참여" },
-      { title: "〈여행은 처음이라서〉", meta: "다큐멘터리 · 제작 중" },
+      {
+        title: "〈여행은 처음이라서〉",
+        meta: "다큐멘터리 · 제작 중",
+        notes: ["광주영화제작지원 선정작"],
+      },
       { title: "〈너는 나의 아이〉", meta: "다큐멘터리 · 제작 중" },
+    ],
+  },
+  {
+    label: "OTHER PRODUCTIONS",
+    items: [
+      { title: "〈열린채널광주 — 시청자 톡앤톡〉", meta: "광주KBS1 · 제작" },
+      { title: "〈24반 무예〉", meta: "국제무예유네스코 · 제작" },
+      { title: "완전자립 교육영상", meta: "광주광역시장애인종합지원센터 · 제작" },
+      { title: "〈시각장애인들의 아모르파티〉", meta: "광주광역시시각장애인복지관 · 제작" },
+      {
+        title: "온라인미디어 아트체인지업 〈우도농악〉",
+        meta: "한국문화예술위원회 · 연출·촬영",
+      },
+      { title: "〈에이블 아트〉", meta: "광주광역시시각장애인연합회 · 연출" },
+      {
+        title: "사회적가치지향사업 〈원촌마을〉",
+        meta: "전남문화재단 · 연출·촬영",
+      },
     ],
   },
   {
@@ -138,7 +182,7 @@ export default function AboutPage() {
           <div className="mt-4 grid gap-x-10 gap-y-10 sm:grid-cols-2">
             {[
               [WORKS[0], WORKS[3]],
-              [WORKS[1], WORKS[2]],
+              [WORKS[2], WORKS[1], WORKS[4]],
             ].map((column, ci) => (
               <div key={ci} className="space-y-10">
                 {column.map((group) => (
@@ -157,6 +201,16 @@ export default function AboutPage() {
                         <p className="mt-1 text-[12px] leading-relaxed text-neutral-500">
                           {item.meta}
                         </p>
+                      )}
+                      {item.notes && (
+                        <ul className="mt-1.5 space-y-0.5 text-[12px] leading-relaxed text-neutral-500">
+                          {item.notes.map((n) => (
+                            <li key={n} className="flex gap-1.5">
+                              <span aria-hidden className="shrink-0 text-neutral-300">–</span>
+                              <span>{n}</span>
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </li>
                   ))}
