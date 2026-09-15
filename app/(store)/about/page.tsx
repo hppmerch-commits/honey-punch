@@ -181,8 +181,8 @@ export default function AboutPage() {
           {/* 두 열의 항목 수가 비슷하게(9:9) 묶어서 아래쪽이 비지 않게 한다 */}
           <div className="mt-4 grid gap-x-10 gap-y-10 sm:grid-cols-2">
             {[
-              [WORKS[0], WORKS[3]],
-              [WORKS[2], WORKS[1], WORKS[4]],
+              [WORKS[0], WORKS[3], WORKS[4]],
+              [WORKS[2], WORKS[1]],
             ].map((column, ci) => (
               <div key={ci} className="space-y-10">
                 {column.map((group) => (
