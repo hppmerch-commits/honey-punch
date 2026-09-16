@@ -119,9 +119,16 @@ export default async function OrderCompletePage({
           </p>
         </section>
 
-        <p className="mt-10 text-[12px] leading-relaxed text-neutral-400">
-          주문 관련 문의는 주문번호와 함께 남겨주세요. 이 페이지 주소를
-          저장해두시면 언제든 주문 내용을 다시 확인할 수 있습니다.
+        <p className="mt-10 break-keep text-[12px] leading-relaxed text-neutral-500">
+          이 페이지 주소를 저장해두시면 언제든 주문 내용을 다시 확인하실 수
+          있습니다. 주소를 잃어버리셨다면{" "}
+          <Link
+            href="/order-lookup"
+            className="underline underline-offset-2 hover:text-black"
+          >
+            주문조회
+          </Link>
+          에서 주문번호와 연락처로 다시 찾으실 수 있습니다.
         </p>
 
         <Link

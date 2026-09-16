@@ -79,9 +79,12 @@ export default function Header() {
               <IconGlobe />
               한국어 | KRW
             </span>
-            <Link href="/admin" className="flex items-center gap-1.5 hover:opacity-60">
+            <Link
+              href="/order-lookup"
+              className="flex items-center gap-1.5 hover:opacity-60"
+            >
               <IconUser />
-              ACCOUNT
+              주문조회
             </Link>
             <Link href="/wishlist" className="flex items-center gap-1.5 hover:opacity-60">
               <IconHeart />
@@ -193,11 +196,11 @@ export default function Header() {
               Cart
             </Link>
             <Link
-              href="/admin"
+              href="/order-lookup"
               onClick={() => setOpen(false)}
               className="flex min-h-11 items-center active:opacity-50"
             >
-              Admin
+              주문조회
             </Link>
             <span className="flex min-h-11 items-center text-neutral-400">
               한국어 (KRW)

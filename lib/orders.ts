@@ -135,6 +135,26 @@ export async function getOrderByNumber(orderNumber: string) {
   });
 }
 
+/** 숫자만 남겨 비교한다 — 010-1234-5678 / 01012345678 를 같은 값으로 본다. */
+const digits = (s: string) => s.replace(/\D/g, "");
+
+/**
+ * 비회원 주문조회 — 주문번호와 연락처가 모두 맞아야 돌려준다.
+ * 둘 중 무엇이 틀렸는지 알려주지 않는다(주문번호 존재 여부 노출 방지).
+ */
+export async function findOrderForLookup(orderNumber: string, phone: string) {
+  const no = orderNumber.trim().toUpperCase();
+  const tel = digits(phone);
+  if (!no || tel.length < 9) return null;
+
+  const order = await prisma.order.findUnique({
+    where: { orderNumber: no },
+    include: { items: true },
+  });
+  if (!order || digits(order.phone) !== tel) return null;
+  return order;
+}
+
 export async function getOrderById(id: string) {
   return prisma.order.findUnique({
     where: { id },

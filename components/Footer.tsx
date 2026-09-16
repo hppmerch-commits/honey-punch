@@ -78,6 +78,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/order-lookup"
+                  className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
+                >
+                  주문조회
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/about"
                   className="flex min-h-11 items-center text-[14px] text-neutral-600 transition-colors active:opacity-50 lg:min-h-0 lg:py-1.5 lg:text-[13px] lg:hover:text-black"
                 >
