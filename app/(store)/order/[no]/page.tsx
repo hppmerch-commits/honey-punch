@@ -5,6 +5,7 @@ import { getOrderByNumber } from "@/lib/orders";
 import { won } from "@/lib/product-types";
 import { statusLabel, formatOrderDate } from "@/lib/order-types";
 import { bankTransfer, hasBankInfo } from "@/lib/site";
+import { btnOutline, sectionLabel } from "@/lib/ui";
 
 export const metadata = { title: "주문 완료 — HONEY PUNCH" };
 export const dynamic = "force-dynamic";
@@ -34,7 +35,7 @@ export default async function OrderCompletePage({
 
         {/* 입금 안내 */}
         {order.status === "PENDING" && (
-          <div className="mt-8 border border-black px-5 py-5">
+          <div className="mt-8 border border-[#1e1e1e] px-5 py-5">
             <p className="text-[13px] tracking-[0.08em]">무통장입금 안내</p>
             {hasBankInfo() ? (
               <p className="mt-2 text-[14px] leading-relaxed">
@@ -104,7 +105,7 @@ export default async function OrderCompletePage({
 
         {/* 배송지 */}
         <section className="mt-10">
-          <h2 className="text-[13px] tracking-[0.12em]">배송지</h2>
+          <h2 className={sectionLabel}>배송지</h2>
           <p className="mt-3 text-[13px] leading-relaxed text-neutral-600">
             {order.customerName} · {order.phone}
             <br />
@@ -133,7 +134,7 @@ export default async function OrderCompletePage({
 
         <Link
           href="/shop"
-          className="mt-8 flex h-12 w-full items-center justify-center border border-neutral-300 text-[12px] tracking-[0.1em] transition-colors hover:border-black"
+          className={`mt-8 ${btnOutline}`}
         >
           쇼핑 계속하기
         </Link>

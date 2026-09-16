@@ -8,9 +8,13 @@ import { won, isSoldOut, type Product } from "@/lib/product-types";
 import { shipping } from "@/lib/site";
 import { useStore, itemKey } from "@/components/StoreProvider";
 import { placeOrderAction, type CheckoutState } from "./actions";
-
-const inputCls =
-  "h-12 w-full border border-neutral-300 px-4 text-[14px] outline-none transition-colors focus:border-black";
+import {
+  fieldInput,
+  fieldLabel,
+  btnPrimary,
+  btnOutline,
+  sectionLabel,
+} from "@/lib/ui";
 
 export default function CheckoutForm({ products }: { products: Product[] }) {
   const { cart, clearCart, ready } = useStore();
@@ -68,7 +72,7 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
           <p className="text-[13px] text-neutral-400">주문할 상품이 없습니다.</p>
           <Link
             href="/shop"
-            className="mt-6 inline-flex h-11 items-center bg-black px-8 text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85"
+            className={`mt-6 mx-auto max-w-[240px] ${btnPrimary}`}
           >
             쇼핑하러 가기
           </Link>
@@ -101,7 +105,7 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
         <div>
           {/* 주문 상품 */}
           <section>
-            <h2 className="text-[13px] tracking-[0.12em]">주문 상품</h2>
+            <h2 className={sectionLabel}>주문 상품</h2>
             <ul className="mt-4 border-t border-neutral-200">
               {items.map((item) => (
                 <li
@@ -134,88 +138,74 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
 
           {/* 배송 정보 */}
           <section className="mt-12">
-            <h2 className="text-[13px] tracking-[0.12em]">배송 정보</h2>
+            <h2 className={sectionLabel}>배송 정보</h2>
             <div className="mt-4 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block">
-                  <span className="mb-1.5 block text-[12px] text-neutral-500">
-                    받는 분 *
-                  </span>
+                  <span className={fieldLabel}>받는 분 *</span>
                   <input
                     name="customerName"
                     required
                     maxLength={50}
                     autoComplete="name"
-                    className={inputCls}
+                    className={fieldInput}
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-1.5 block text-[12px] text-neutral-500">
-                    연락처 *
-                  </span>
+                  <span className={fieldLabel}>연락처 *</span>
                   <input
                     name="phone"
                     required
                     inputMode="tel"
                     placeholder="010-0000-0000"
                     autoComplete="tel"
-                    className={inputCls}
+                    className={fieldInput}
                   />
                 </label>
               </div>
 
               <label className="block">
-                <span className="mb-1.5 block text-[12px] text-neutral-500">
-                  이메일 (선택)
-                </span>
+                <span className={fieldLabel}>이메일 (선택)</span>
                 <input
                   name="email"
                   type="email"
                   autoComplete="email"
-                  className={inputCls}
+                  className={fieldInput}
                 />
               </label>
 
               <div className="grid gap-4 sm:grid-cols-[140px_1fr]">
                 <label className="block">
-                  <span className="mb-1.5 block text-[12px] text-neutral-500">
-                    우편번호
-                  </span>
+                  <span className={fieldLabel}>우편번호</span>
                   <input
                     name="postcode"
                     inputMode="numeric"
                     autoComplete="postal-code"
-                    className={inputCls}
+                    className={fieldInput}
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-1.5 block text-[12px] text-neutral-500">
-                    주소 *
-                  </span>
+                  <span className={fieldLabel}>주소 *</span>
                   <input
                     name="address1"
                     required
                     autoComplete="street-address"
-                    className={inputCls}
+                    className={fieldInput}
                   />
                 </label>
               </div>
 
               <label className="block">
-                <span className="mb-1.5 block text-[12px] text-neutral-500">
-                  상세 주소
-                </span>
-                <input name="address2" className={inputCls} />
+                <span className={fieldLabel}>상세 주소</span>
+                <input name="address2" className={fieldInput} />
               </label>
 
               <label className="block">
-                <span className="mb-1.5 block text-[12px] text-neutral-500">
-                  배송 요청사항
-                </span>
+                <span className={fieldLabel}>배송 요청사항</span>
                 <input
                   name="memo"
                   placeholder="예: 부재 시 문 앞에 놓아주세요"
-                  className={inputCls}
+                  className={fieldInput}
                 />
               </label>
             </div>
@@ -223,8 +213,8 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
 
           {/* 결제 수단 */}
           <section className="mt-12">
-            <h2 className="text-[13px] tracking-[0.12em]">결제 수단</h2>
-            <div className="mt-4 border border-black px-5 py-4">
+            <h2 className={sectionLabel}>결제 수단</h2>
+            <div className="mt-4 border border-[#1e1e1e] px-5 py-4">
               <p className="text-[14px]">무통장입금</p>
               <p className="mt-1 text-[12px] leading-relaxed text-neutral-500">
                 주문 후 입금 계좌를 안내드립니다. 입금 확인 후 배송이
@@ -236,7 +226,7 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
 
         {/* 결제 요약 */}
         <aside className="mt-12 h-fit border border-neutral-200 p-6 sm:p-7 lg:sticky lg:top-24 lg:mt-0">
-          <h2 className="text-[13px] tracking-[0.12em]">ORDER SUMMARY</h2>
+          <h2 className={sectionLabel}>ORDER SUMMARY</h2>
           <dl className="mt-6 space-y-3 text-[13px]">
             <div className="flex justify-between">
               <dt className="text-neutral-500">상품 금액</dt>
@@ -270,13 +260,13 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
 
           <button
             disabled={pending}
-            className="mt-5 h-13 w-full bg-black py-4 text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85 disabled:cursor-wait disabled:opacity-50"
+            className={`mt-5 ${btnPrimary}`}
           >
             {pending ? "주문 처리 중…" : `${won(subtotal + fee)} 주문하기`}
           </button>
           <Link
             href="/cart"
-            className="mt-3 flex h-12 w-full items-center justify-center border border-neutral-300 text-[12px] tracking-[0.1em] transition-colors hover:border-black"
+            className={`mt-3 ${btnOutline}`}
           >
             장바구니로 돌아가기
           </Link>

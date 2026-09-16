@@ -6,6 +6,7 @@ import Link from "next/link";
 import { won, isSoldOut, type Product } from "@/lib/product-types";
 import { shipping } from "@/lib/site";
 import { useStore, itemKey } from "@/components/StoreProvider";
+import { btnPrimary, btnOutline, sectionLabel } from "@/lib/ui";
 
 const FREE_SHIPPING_FROM = shipping.freeFrom;
 const SHIPPING_FEE = shipping.fee;
@@ -73,7 +74,7 @@ export default function CartView({ products }: { products: Product[] }) {
           <p className="text-[13px] text-neutral-400">장바구니가 비어 있습니다.</p>
           <Link
             href="/shop"
-            className="mt-6 inline-flex h-11 items-center bg-black px-8 text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85"
+            className={`mx-auto mt-6 max-w-[240px] ${btnPrimary}`}
           >
             쇼핑하러 가기
           </Link>
@@ -155,7 +156,7 @@ export default function CartView({ products }: { products: Product[] }) {
 
           {/* 결제 요약 */}
           <aside className="mt-10 h-fit border border-neutral-200 p-6 sm:p-7 lg:sticky lg:top-24 lg:mt-0">
-            <h2 className="text-[13px] tracking-[0.12em]">ORDER SUMMARY</h2>
+            <h2 className={sectionLabel}>ORDER SUMMARY</h2>
             <dl className="mt-6 space-y-3 text-[13px]">
               <div className="flex justify-between">
                 <dt className="text-neutral-500">상품 금액</dt>
@@ -180,13 +181,13 @@ export default function CartView({ products }: { products: Product[] }) {
 
             <Link
               href="/checkout"
-              className="mt-7 flex h-13 w-full items-center justify-center bg-black py-4 text-[12px] tracking-[0.1em] text-white transition-opacity hover:opacity-85"
+              className={`mt-7 ${btnPrimary}`}
             >
               주문하기
             </Link>
             <Link
               href="/shop"
-              className="mt-3 flex h-12 w-full items-center justify-center border border-neutral-300 text-[12px] tracking-[0.1em] transition-colors hover:border-black"
+              className={`mt-3 ${btnOutline}`}
             >
               계속 쇼핑하기
             </Link>
