@@ -264,3 +264,31 @@ export async function markOrderPaidByPg(
   });
   return res.count > 0;
 }
+
+/**
+ * PG 쪽에서 이미 취소(환불)된 것을 웹훅으로 통보받았을 때 — 나이스페이 취소 API를
+ * 다시 부르지 않고 주문 상태와 재고만 맞춘다. 이미 취소된 주문이면 아무것도 하지 않는다.
+ */
+export async function markOrderCancelledByPg(orderNumber: string, cancelledTid: string) {
+  const order = await prisma.order.findUnique({
+    where: { orderNumber },
+    include: { items: true },
+  });
+  if (!order || order.paymentMethod !== "CARD") return false;
+
+  return prisma.$transaction(async (tx) => {
+    const flipped = await tx.order.updateMany({
+      where: { orderNumber, status: { in: ["PENDING", "PAID"] } },
+      data: { status: "CANCELLED", pgCancelledTid: cancelledTid },
+    });
+    if (flipped.count === 0) return false;
+    for (const item of order.items) {
+      if (!item.productId) continue;
+      await tx.product.updateMany({
+        where: { id: item.productId },
+        data: { stock: { increment: item.qty } },
+      });
+    }
+    return true;
+  });
+}
