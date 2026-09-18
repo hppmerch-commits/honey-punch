@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { shipping } from "@/lib/site";
 import type { OrderItemInput } from "@/lib/order-types";
+import { cancelPayment, NicepayError } from "@/lib/nicepay";
 
 /** 헷갈리는 글자(0/O, 1/I/L)를 뺀 주문번호용 문자셋 */
 const CODE_CHARS = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -27,8 +28,11 @@ export class OrderError extends Error {}
  * 주문 생성 — 가격은 클라이언트 값을 믿지 않고 DB에서 다시 계산한다.
  * 재고는 조건부 차감(재고 >= 수량)으로 동시 주문 경쟁을 막는다.
  */
+export type PaymentMethod = "BANK_TRANSFER" | "CARD";
+
 export async function createOrder(input: {
   items: OrderItemInput[];
+  paymentMethod?: PaymentMethod;
   customerName: string;
   phone: string;
   email: string;
@@ -91,6 +95,7 @@ export async function createOrder(input: {
         return await tx.order.create({
           data: {
             orderNumber: newOrderNumber(),
+            paymentMethod: input.paymentMethod ?? "BANK_TRANSFER",
             customerName: input.customerName,
             phone: input.phone,
             email: input.email,
@@ -193,19 +198,42 @@ export async function listOrdersForAdmin({
   };
 }
 
-/** 취소 시 차감했던 재고를 되돌린다 (이미 취소된 주문은 무시). */
-export async function cancelOrder(id: string) {
-  return prisma.$transaction(async (tx) => {
-    const order = await tx.order.findUnique({
-      where: { id },
-      include: { items: true },
-    });
-    if (!order) throw new OrderError("주문을 찾을 수 없습니다.");
-    if (order.status === "CANCELLED") return order;
-    if (order.status === "SHIPPED" || order.status === "DONE") {
-      throw new OrderError("배송이 시작된 주문은 취소할 수 없습니다.");
-    }
+/**
+ * 취소 — 차감했던 재고를 되돌린다. 카드로 결제 완료된 주문은
+ * 나이스페이먼츠 전액 취소(환불)가 성공해야만 취소 상태로 바꾼다.
+ */
+export async function cancelOrder(id: string, reason = "판매자 취소") {
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { items: true },
+  });
+  if (!order) throw new OrderError("주문을 찾을 수 없습니다.");
+  if (order.status === "CANCELLED") return order;
+  if (order.status === "SHIPPED" || order.status === "DONE") {
+    throw new OrderError("배송이 시작된 주문은 취소할 수 없습니다.");
+  }
 
+  // 환불이 먼저다 — PG 취소가 실패하면 주문 상태를 건드리지 않는다.
+  let cancelledTid = "";
+  if (order.paymentMethod === "CARD" && order.status === "PAID" && order.pgTid) {
+    try {
+      const r = await cancelPayment(order.pgTid, order.orderNumber, reason);
+      cancelledTid = r.cancelledTid ?? "";
+    } catch (e) {
+      const msg = e instanceof NicepayError ? e.message : "환불 요청에 실패했습니다.";
+      throw new OrderError(`카드 환불 실패: ${msg}`);
+    }
+  }
+
+  return prisma.$transaction(async (tx) => {
+    // 상태 전이를 조건부로 먼저 걸어, 동시에 두 번 취소돼도 재고가 두 번 복원되지 않게 한다.
+    const flipped = await tx.order.updateMany({
+      where: { id, status: order.status },
+      data: { status: "CANCELLED", pgCancelledTid: cancelledTid },
+    });
+    if (flipped.count === 0) {
+      return tx.order.findUniqueOrThrow({ where: { id }, include: { items: true } });
+    }
     for (const item of order.items) {
       if (!item.productId) continue;
       await tx.product.updateMany({
@@ -213,11 +241,26 @@ export async function cancelOrder(id: string) {
         data: { stock: { increment: item.qty } },
       });
     }
-
-    return tx.order.update({
-      where: { id },
-      data: { status: "CANCELLED" },
-      include: { items: true },
-    });
+    return tx.order.findUniqueOrThrow({ where: { id }, include: { items: true } });
   });
+}
+
+/**
+ * PG 승인 성공을 주문에 반영한다. 이미 결제된 주문이면 그대로 둔다(중복 콜백 대비).
+ */
+export async function markOrderPaidByPg(
+  orderNumber: string,
+  pg: { tid: string; payMethod: string; cardName: string; paidAt: Date }
+) {
+  const res = await prisma.order.updateMany({
+    where: { orderNumber, status: "PENDING", paymentMethod: "CARD" },
+    data: {
+      status: "PAID",
+      paidAt: pg.paidAt,
+      pgTid: pg.tid,
+      pgPayMethod: pg.payMethod,
+      pgCardName: pg.cardName,
+    },
+  });
+  return res.count > 0;
 }

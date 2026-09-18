@@ -3,38 +3,93 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getOrderByNumber } from "@/lib/orders";
 import { won } from "@/lib/product-types";
-import { statusLabel, formatOrderDate } from "@/lib/order-types";
+import {
+  statusLabel,
+  paymentMethodLabel,
+  formatOrderDate,
+} from "@/lib/order-types";
 import { bankTransfer, hasBankInfo } from "@/lib/site";
 import { btnOutline, sectionLabel } from "@/lib/ui";
+import PayAgainButton from "@/components/nicepay/PayAgainButton";
+import ClearCart from "@/components/ClearCart";
 
 export const metadata = { title: "주문 완료 — HONEY PUNCH" };
 export const dynamic = "force-dynamic";
 
 export default async function OrderCompletePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ no: string }>;
+  searchParams: Promise<{ pay?: string; msg?: string; paid?: string }>;
 }) {
   const { no } = await params;
+  const sp = await searchParams;
   const order = await getOrderByNumber(decodeURIComponent(no));
   if (!order) notFound();
+
+  const isCard = order.paymentMethod === "CARD";
+  const cardUnpaid = isCard && order.status === "PENDING";
+  const cardPaid = isCard && order.status === "PAID";
+  const heading = order.status === "CANCELLED"
+    ? "취소된 주문입니다"
+    : cardUnpaid
+      ? "결제가 완료되지 않았습니다"
+      : cardPaid
+        ? "결제가 완료되었습니다"
+        : "주문이 접수되었습니다";
 
   return (
     <main className="px-6 py-14 lg:px-12">
       <div className="mx-auto max-w-[640px]">
         <p className="text-[11px] tracking-[0.16em] text-neutral-400">ORDER</p>
         <h1 className="mt-3 text-[26px] leading-snug lg:text-[30px]">
-          주문이 접수되었습니다
+          {heading}
         </h1>
         <p className="mt-3 text-[13px] leading-relaxed text-neutral-500">
-          주문번호 <b className="text-black">{order.orderNumber}</b> ·{" "}
+          주문번호 <b className="text-[#1e1e1e]">{order.orderNumber}</b> ·{" "}
           {formatOrderDate(order.createdAt)}
           <br />
-          현재 상태: {statusLabel(order.status)}
+          {paymentMethodLabel(order.paymentMethod)} · 현재 상태:{" "}
+          {statusLabel(order.status, order.paymentMethod)}
         </p>
 
+        {/* 결제 완료 → 장바구니 비움 (무통장은 주문서에서 이미 비웠지만 다시 해도 무해) */}
+        {(cardPaid || !isCard) && order.status !== "CANCELLED" && <ClearCart />}
+
+        {/* 카드 결제 미완료 — 실패 사유 + 다시 결제 */}
+        {cardUnpaid && (
+          <div className="mt-8 border border-[#1e1e1e] px-5 py-5">
+            <p className="text-[13px] tracking-[0.08em]">카드 결제 안내</p>
+            <p className="mt-2 break-keep text-[13px] leading-relaxed text-neutral-600">
+              {sp.pay === "failed" && sp.msg
+                ? `결제가 진행되지 않았습니다: ${sp.msg}`
+                : "결제창이 닫혀 결제가 진행되지 않았습니다."}{" "}
+              아래 버튼으로 다시 결제하실 수 있습니다. 주문 내용은 그대로 보관됩니다.
+            </p>
+            <PayAgainButton
+              orderNumber={order.orderNumber}
+              amountLabel={won(order.total)}
+            />
+          </div>
+        )}
+
+        {/* 카드 결제 완료 */}
+        {cardPaid && (
+          <div className="mt-8 border border-neutral-200 px-5 py-5">
+            <p className="text-[13px] tracking-[0.08em]">결제 정보</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-neutral-600">
+              {order.pgCardName ? `${order.pgCardName} · ` : ""}
+              {won(order.total)} 결제 완료
+              {order.paidAt && ` · ${formatOrderDate(order.paidAt)}`}
+              <br />
+              입금 확인 절차 없이 바로 배송 준비가 시작됩니다.
+            </p>
+          </div>
+        )}
+
         {/* 입금 안내 */}
-        {order.status === "PENDING" && (
+        {!isCard && order.status === "PENDING" && (
           <div className="mt-8 border border-[#1e1e1e] px-5 py-5">
             <p className="text-[13px] tracking-[0.08em]">무통장입금 안내</p>
             {hasBankInfo() ? (

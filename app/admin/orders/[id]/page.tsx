@@ -7,6 +7,7 @@ import { won } from "@/lib/product-types";
 import {
   statusLabel,
   statusTone,
+  paymentMethodLabel,
   formatOrderDate,
 } from "@/lib/order-types";
 import AdminShell from "../../AdminShell";
@@ -25,14 +26,18 @@ const btn =
 
 export default async function AdminOrderDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   if (!(await isAuthenticated())) redirect("/admin/login");
 
   const { id } = await params;
+  const { error } = await searchParams;
   const order = await getOrderById(id);
   if (!order) notFound();
+  const isCard = order.paymentMethod === "CARD";
 
   return (
     <AdminShell
@@ -41,7 +46,7 @@ export default async function AdminOrderDetailPage({
         <span
           className={`rounded-full px-3 py-1.5 text-[12px] ${statusTone(order.status)}`}
         >
-          {statusLabel(order.status)}
+          {statusLabel(order.status, order.paymentMethod)}
         </span>
       }
     >
@@ -121,8 +126,18 @@ export default async function AdminOrderDetailPage({
                 ],
                 ["요청사항", order.memo || "—"],
                 ["주문 일시", formatOrderDate(order.createdAt)],
+                ["결제 수단", paymentMethodLabel(order.paymentMethod)],
                 ...(order.paidAt
-                  ? [["입금 확인", formatOrderDate(order.paidAt)] as const]
+                  ? [[isCard ? "결제 완료" : "입금 확인", formatOrderDate(order.paidAt)] as const]
+                  : []),
+                ...(order.pgTid
+                  ? [
+                      ["카드", order.pgCardName || order.pgPayMethod || "—"] as const,
+                      ["거래번호(TID)", order.pgTid] as const,
+                    ]
+                  : []),
+                ...(order.pgCancelledTid
+                  ? [["환불 거래번호", order.pgCancelledTid] as const]
                   : []),
                 ...(order.trackingNumber
                   ? [
@@ -149,7 +164,21 @@ export default async function AdminOrderDetailPage({
         <aside className="mt-10 h-fit space-y-4 border border-neutral-200 p-6 lg:sticky lg:top-24 lg:mt-0">
           <h2 className="text-[13px] tracking-[0.12em]">주문 처리</h2>
 
-          {order.status === "PENDING" && (
+          {error && (
+            <p role="alert" className="border border-red-200 bg-red-50 px-3 py-2 text-[12px] leading-relaxed text-red-600">
+              {error}
+            </p>
+          )}
+
+          {order.status === "PENDING" && isCard && (
+            <p className="text-[12px] leading-relaxed text-neutral-500">
+              고객이 카드 결제창을 닫아 아직 결제되지 않은 주문입니다. 고객이 주문
+              상세에서 다시 결제하면 자동으로 결제 완료로 바뀝니다. 오래 방치되면
+              아래에서 취소해 재고를 되돌리세요.
+            </p>
+          )}
+
+          {order.status === "PENDING" && !isCard && (
             <>
               <form action={markPaidAction}>
                 <input type="hidden" name="id" value={order.id} />
@@ -224,7 +253,7 @@ export default async function AdminOrderDetailPage({
             <form action={cancelOrderAction} className="border-t border-neutral-100 pt-4">
               <input type="hidden" name="id" value={order.id} />
               <button className={`${btn} w-full border border-neutral-300 text-neutral-500 hover:border-black hover:text-black`}>
-                주문 취소 (재고 복원)
+                {isCard && order.status === "PAID" ? "주문 취소 · 카드 환불" : "주문 취소 (재고 복원)"}
               </button>
             </form>
           )}

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { cancelOrder, OrderError } from "@/lib/orders";
@@ -54,13 +55,16 @@ export async function completeOrderAction(formData: FormData) {
 export async function cancelOrderAction(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("id") ?? "");
+  let failure: string | null = null;
   try {
     await cancelOrder(id);
   } catch (e) {
     if (!(e instanceof OrderError)) throw e;
-    // 전이 불가(배송중 등)면 화면 갱신만 한다 — 버튼 노출 조건상 정상 흐름에서는 오지 않는다.
+    // 카드 환불 실패 등은 관리자가 봐야 하므로 상세 화면에 띄운다.
+    failure = e.message;
   }
   refresh(id);
+  if (failure) redirect(`/admin/orders/${id}?error=${encodeURIComponent(failure)}`);
 }
 
 /** 취소된 주문 삭제 — 테스트 주문 정리용 */

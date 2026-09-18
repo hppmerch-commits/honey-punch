@@ -82,9 +82,15 @@ model Order {
   shippingFee Int
   total       Int
 
-  /// 현재는 무통장입금만 지원. PG 연동 시 확장.
+  /// BANK_TRANSFER(무통장입금) | CARD(나이스페이먼츠 결제창)
   paymentMethod String    @default("BANK_TRANSFER")
   paidAt        DateTime?
+
+  /// 나이스페이먼츠 거래 정보 — 승인 성공 시 채워지고, 환불 시 cancelledTid가 남는다.
+  pgTid          String? @unique
+  pgPayMethod    String  @default("")
+  pgCardName     String  @default("")
+  pgCancelledTid String  @default("")
 
   courier        String @default("")
   trackingNumber String @default("")

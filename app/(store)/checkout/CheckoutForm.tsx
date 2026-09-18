@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import { won, isSoldOut, type Product } from "@/lib/product-types";
 import { shipping } from "@/lib/site";
 import { useStore, itemKey } from "@/components/StoreProvider";
 import { placeOrderAction, type CheckoutState } from "./actions";
+import { openNicepay } from "@/components/nicepay/launch";
 import {
   fieldInput,
   fieldLabel,
@@ -16,8 +17,19 @@ import {
   sectionLabel,
 } from "@/lib/ui";
 
-export default function CheckoutForm({ products }: { products: Product[] }) {
+export default function CheckoutForm({
+  products,
+  cardEnabled,
+}: {
+  products: Product[];
+  /** 나이스페이먼츠 키가 설정된 경우에만 카드 결제를 보여준다 */
+  cardEnabled: boolean;
+}) {
   const { cart, clearCart, ready } = useStore();
+  const [method, setMethod] = useState<"BANK_TRANSFER" | "CARD">(
+    cardEnabled ? "CARD" : "BANK_TRANSFER"
+  );
+  const [payError, setPayError] = useState<string | null>(null);
   const router = useRouter();
   const [state, formAction, pending] = useActionState<CheckoutState, FormData>(
     placeOrderAction,
@@ -45,14 +57,26 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
   const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
   const fee = items.length === 0 || subtotal >= shipping.freeFrom ? 0 : shipping.fee;
 
-  // 주문 성공 → 장바구니 비우고 완료 페이지로
+  // 주문 생성 성공 → 무통장은 완료 페이지로, 카드는 결제창을 띄운다.
+  // 카드는 결제가 끝나야 장바구니를 비운다(결제창을 닫아도 다시 시도할 수 있게).
   const completed = useRef(false);
   useEffect(() => {
-    if (state?.ok && !completed.current) {
-      completed.current = true;
-      clearCart();
-      router.replace(`/order/${state.orderNumber}`);
+    if (!state?.ok || completed.current) return;
+    completed.current = true;
+    if (state.pay) {
+      openNicepay(state.pay, (msg) => {
+        completed.current = false;
+        setPayError(
+          `${msg} 주문(${state.orderNumber})은 접수되어 있으니 주문조회에서 다시 결제하실 수 있습니다.`
+        );
+      }).catch((e: Error) => {
+        completed.current = false;
+        setPayError(e.message);
+      });
+      return;
     }
+    clearCart();
+    router.replace(`/order/${state.orderNumber}`);
   }, [state, clearCart, router]);
 
   if (!ready) {
@@ -214,12 +238,51 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
           {/* 결제 수단 */}
           <section className="mt-12">
             <h2 className={sectionLabel}>결제 수단</h2>
-            <div className="mt-4 border border-[#1e1e1e] px-5 py-4">
-              <p className="text-[14px]">무통장입금</p>
-              <p className="mt-1 text-[12px] leading-relaxed text-neutral-500">
-                주문 후 입금 계좌를 안내드립니다. 입금 확인 후 배송이
-                시작됩니다.
-              </p>
+            <div className="mt-4 space-y-2">
+              {cardEnabled && (
+                <label
+                  className={`flex cursor-pointer items-start gap-3 border px-5 py-4 transition-colors ${
+                    method === "CARD" ? "border-[#1e1e1e]" : "border-neutral-200"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="CARD"
+                    checked={method === "CARD"}
+                    onChange={() => setMethod("CARD")}
+                    className="mt-1 h-4 w-4 accent-black"
+                  />
+                  <span>
+                    <span className="block text-[14px]">카드 · 간편결제</span>
+                    <span className="mt-1 block text-[12px] leading-relaxed text-neutral-500">
+                      나이스페이먼츠 결제창에서 안전하게 결제됩니다. 결제 즉시
+                      주문이 확정됩니다.
+                    </span>
+                  </span>
+                </label>
+              )}
+              <label
+                className={`flex cursor-pointer items-start gap-3 border px-5 py-4 transition-colors ${
+                  method === "BANK_TRANSFER" ? "border-[#1e1e1e]" : "border-neutral-200"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="BANK_TRANSFER"
+                  checked={method === "BANK_TRANSFER"}
+                  onChange={() => setMethod("BANK_TRANSFER")}
+                  className="mt-1 h-4 w-4 accent-black"
+                />
+                <span>
+                  <span className="block text-[14px]">무통장입금</span>
+                  <span className="mt-1 block text-[12px] leading-relaxed text-neutral-500">
+                    주문 후 입금 계좌를 안내드립니다. 입금 확인 후 배송이
+                    시작됩니다.
+                  </span>
+                </span>
+              </label>
             </div>
           </section>
         </div>
@@ -252,9 +315,9 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
             주문 내용과 결제 금액을 확인했으며, 결제 진행에 동의합니다.
           </label>
 
-          {state && !state.ok && (
+          {((state && !state.ok) || payError) && (
             <p role="alert" className="mt-4 text-[12px] leading-relaxed text-red-600">
-              {state.error}
+              {payError ?? (state && !state.ok ? state.error : "")}
             </p>
           )}
 
@@ -262,7 +325,11 @@ export default function CheckoutForm({ products }: { products: Product[] }) {
             disabled={pending}
             className={`mt-5 ${btnPrimary}`}
           >
-            {pending ? "주문 처리 중…" : `${won(subtotal + fee)} 주문하기`}
+            {pending
+              ? "주문 처리 중…"
+              : method === "CARD"
+                ? `${won(subtotal + fee)} 결제하기`
+                : `${won(subtotal + fee)} 주문하기`}
           </button>
           <Link
             href="/cart"

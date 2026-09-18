@@ -113,7 +113,7 @@ export default async function AdminOrdersPage({
                     <span
                       className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] ${statusTone(o.status)}`}
                     >
-                      {statusLabel(o.status)}
+                      {statusLabel(o.status, o.paymentMethod)}
                     </span>
                   </div>
                   <p className="mt-2 truncate text-[13px]">{itemsSummary(o)}</p>
@@ -169,7 +169,7 @@ export default async function AdminOrdersPage({
                       <span
                         className={`rounded-full px-2.5 py-1 text-[11px] ${statusTone(o.status)}`}
                       >
-                        {statusLabel(o.status)}
+                        {statusLabel(o.status, o.paymentMethod)}
                       </span>
                     </td>
                   </tr>
