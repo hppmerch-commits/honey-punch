@@ -12,6 +12,7 @@ import { bankTransfer, hasBankInfo } from "@/lib/site";
 import { btnOutline, sectionLabel } from "@/lib/ui";
 import PayAgainButton from "@/components/nicepay/PayAgainButton";
 import ClearCart from "@/components/ClearCart";
+import CancelOrderForm from "@/components/CancelOrderForm";
 
 export const metadata = { title: "주문 완료 — HONEY PUNCH" };
 export const dynamic = "force-dynamic";
@@ -31,6 +32,8 @@ export default async function OrderCompletePage({
   const isCard = order.paymentMethod === "CARD";
   const cardUnpaid = isCard && order.status === "PENDING";
   const cardPaid = isCard && order.status === "PAID";
+  const bankPaid = !isCard && order.status === "PAID";
+  const cancellable = order.status === "PENDING" || cardPaid;
   const heading = order.status === "CANCELLED"
     ? "취소된 주문입니다"
     : cardUnpaid
@@ -186,6 +189,26 @@ export default async function OrderCompletePage({
           </Link>
           에서 주문번호와 연락처로 다시 찾으실 수 있습니다.
         </p>
+
+        {/* 고객 취소 — 결제 대기 / 카드 결제 완료만 자동 취소, 무통장 입금 완료는 안내 */}
+        {cancellable && (
+          <section className="mt-10">
+            <h2 className={sectionLabel}>주문 취소</h2>
+            <CancelOrderForm orderNumber={order.orderNumber} isCardPaid={cardPaid} />
+          </section>
+        )}
+        {bankPaid && (
+          <p className="mt-10 break-keep text-[12px] leading-relaxed text-neutral-500">
+            입금이 확인된 주문은 환불 계좌 확인이 필요해 이 화면에서 바로 취소되지 않습니다.
+            취소를 원하시면 주문번호와 함께 문의해 주세요.
+          </p>
+        )}
+        {order.status === "CANCELLED" && isCard && order.pgCancelledTid && (
+          <p className="mt-8 break-keep text-[13px] leading-relaxed text-neutral-600">
+            카드 승인 취소가 완료되었습니다. 카드사에 따라 영업일 기준 1~5일 뒤 취소 내역이
+            표시됩니다.
+          </p>
+        )}
 
         <Link
           href="/shop"
