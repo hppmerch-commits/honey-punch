@@ -6,6 +6,7 @@ import {
   NicepayError,
 } from "@/lib/nicepay";
 import { getOrderByNumber, markOrderPaidByPg } from "@/lib/orders";
+import { publicOrigin } from "@/lib/origin";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,8 @@ export async function POST(req: Request) {
   const f = (k: string) => String(form.get(k) ?? "");
 
   const orderId = f("orderId");
-  const origin = new URL(req.url).origin;
+  // req.url은 컨테이너 내부 주소(localhost:8080)라 쓰면 안 된다.
+  const origin = publicOrigin(req.headers);
   const toOrder = (params: Record<string, string>) => {
     const u = new URL(`/order/${encodeURIComponent(orderId)}`, origin);
     for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
@@ -76,5 +78,5 @@ export async function POST(req: Request) {
 
 /** 브라우저에서 직접 열면 주문서로 돌려보낸다. */
 export async function GET(req: Request) {
-  return NextResponse.redirect(new URL("/checkout", new URL(req.url).origin), 303);
+  return NextResponse.redirect(new URL("/checkout", publicOrigin(req.headers)), 303);
 }

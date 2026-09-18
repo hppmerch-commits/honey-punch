@@ -8,6 +8,7 @@ import {
   type PaymentMethod,
 } from "@/lib/orders";
 import { isNicepayEnabled, nicepayClientId, goodsNameFor } from "@/lib/nicepay";
+import { publicOrigin } from "@/lib/origin";
 import type { OrderItemInput } from "@/lib/order-types";
 
 /** 결제창을 띄우는 데 필요한 값 — 브라우저에 내려가도 되는 것만 담는다. */
@@ -34,12 +35,7 @@ const str = (v: FormDataEntryValue | null, max = 200) =>
 
 /** returnUrl의 기준 주소 — SITE_URL이 없으면 요청 헤더(Railway 프록시 포함)로 추정 */
 async function siteOrigin() {
-  const fixed = process.env.SITE_URL?.replace(/\/$/, "");
-  if (fixed) return fixed;
-  const h = await headers();
-  const proto = h.get("x-forwarded-proto") ?? "https";
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
-  return `${proto}://${host}`;
+  return publicOrigin(await headers());
 }
 
 export async function placeOrderAction(
