@@ -9,11 +9,18 @@ import {
 } from "@/lib/orders";
 import { isNicepayEnabled, nicepayClientId, goodsNameFor } from "@/lib/nicepay";
 import { publicOrigin } from "@/lib/origin";
-import type { OrderItemInput } from "@/lib/order-types";
+import {
+  isPaymentMethod,
+  isPgMethod,
+  nicepayMethod,
+  type OrderItemInput,
+} from "@/lib/order-types";
 
 /** 결제창을 띄우는 데 필요한 값 — 브라우저에 내려가도 되는 것만 담는다. */
 export type NicepayLaunch = {
   clientId: string;
+  /** 결제창 method: card | bank | vbank | cellphone */
+  method: string;
   orderId: string;
   amount: number;
   goodsName: string;
@@ -21,6 +28,8 @@ export type NicepayLaunch = {
   buyerName: string;
   buyerTel: string;
   buyerEmail: string;
+  /** 가상계좌 입금자명 — 규격상 필수 */
+  vbankHolder?: string;
 };
 
 export type CheckoutState =
@@ -64,12 +73,12 @@ export async function placeOrderAction(
   const address2 = str(formData.get("address2"), 200);
   const memo = str(formData.get("memo"), 300);
 
-  // 결제 수단 — 키가 없으면 카드를 골라도 무통장으로 처리하지 않고 막는다.
-  const wantsCard = formData.get("paymentMethod") === "CARD";
-  if (wantsCard && !isNicepayEnabled()) {
+  // 결제 수단 — 키가 없으면 PG 수단을 골라도 무통장으로 넘기지 않고 막는다.
+  const picked = String(formData.get("paymentMethod") ?? "");
+  const paymentMethod: PaymentMethod = isPaymentMethod(picked) ? picked : "BANK_TRANSFER";
+  if (isPgMethod(paymentMethod) && !isNicepayEnabled()) {
     return { ok: false, error: "카드 결제가 아직 준비되지 않았습니다. 무통장입금을 선택해 주세요." };
   }
-  const paymentMethod: PaymentMethod = wantsCard ? "CARD" : "BANK_TRANSFER";
 
   if (!customerName) return { ok: false, error: "받는 분 성함을 입력해 주세요." };
   if (phone.replace(/-/g, "").length < 9)
@@ -93,7 +102,7 @@ export async function placeOrderAction(
       memo,
     });
 
-    if (paymentMethod !== "CARD") {
+    if (!isPgMethod(paymentMethod)) {
       return { ok: true, orderNumber: order.orderNumber };
     }
 
@@ -103,6 +112,7 @@ export async function placeOrderAction(
       orderNumber: order.orderNumber,
       pay: {
         clientId: nicepayClientId(),
+        method: nicepayMethod(paymentMethod),
         orderId: order.orderNumber,
         amount: order.total,
         goodsName: goodsNameFor(order.items),
@@ -110,6 +120,7 @@ export async function placeOrderAction(
         buyerName: customerName,
         buyerTel: phone,
         buyerEmail: email,
+        vbankHolder: customerName,
       },
     };
   } catch (e) {
@@ -131,14 +142,19 @@ export async function relaunchPaymentAction(
 ): Promise<{ ok: true; pay: NicepayLaunch } | { ok: false; error: string }> {
   if (!isNicepayEnabled()) return { ok: false, error: "카드 결제가 준비되지 않았습니다." };
   const order = await getOrderByNumber(orderNumber);
-  if (!order || order.paymentMethod !== "CARD" || order.status !== "PENDING") {
+  if (!order || !isPgMethod(order.paymentMethod) || order.status !== "PENDING") {
     return { ok: false, error: "결제를 진행할 수 없는 주문입니다." };
+  }
+  // 가상계좌는 이미 계좌가 발급돼 있으면 결제창을 다시 열 게 아니라 그 계좌로 입금해야 한다.
+  if (order.paymentMethod === "VBANK" && order.pgVbankNumber) {
+    return { ok: false, error: "이미 발급된 가상계좌로 입금해 주세요." };
   }
   const origin = await siteOrigin();
   return {
     ok: true,
     pay: {
       clientId: nicepayClientId(),
+      method: nicepayMethod(order.paymentMethod),
       orderId: order.orderNumber,
       amount: order.total,
       goodsName: goodsNameFor(order.items),
@@ -146,6 +162,7 @@ export async function relaunchPaymentAction(
       buyerName: order.customerName,
       buyerTel: order.phone,
       buyerEmail: order.email,
+      vbankHolder: order.customerName,
     },
   };
 }

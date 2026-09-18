@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { won, isSoldOut, type Product } from "@/lib/product-types";
+import { isPgMethod, type PaymentMethod } from "@/lib/order-types";
 import { shipping } from "@/lib/site";
 import { useStore, itemKey } from "@/components/StoreProvider";
 import { placeOrderAction, type CheckoutState } from "./actions";
@@ -17,16 +18,55 @@ import {
   sectionLabel,
 } from "@/lib/ui";
 
+/** pg=true인 수단은 나이스페이먼츠 키가 있을 때만 보여준다. */
+const METHOD_OPTIONS: {
+  value: PaymentMethod;
+  label: string;
+  hint: string;
+  pg: boolean;
+}[] = [
+  {
+    value: "CARD",
+    label: "신용카드",
+    hint: "나이스페이먼츠 결제창에서 안전하게 결제됩니다. 결제 즉시 주문이 확정됩니다.",
+    pg: true,
+  },
+  {
+    value: "BANK",
+    label: "계좌이체",
+    hint: "인터넷뱅킹으로 바로 이체합니다. 이체 즉시 주문이 확정됩니다.",
+    pg: true,
+  },
+  {
+    value: "VBANK",
+    label: "가상계좌",
+    hint: "주문 전용 계좌번호를 발급해 드립니다. 3일 안에 입금하시면 자동으로 확인됩니다.",
+    pg: true,
+  },
+  {
+    value: "CELLPHONE",
+    label: "휴대폰 결제",
+    hint: "휴대폰 소액결제로 통신요금과 함께 청구됩니다.",
+    pg: true,
+  },
+  {
+    value: "BANK_TRANSFER",
+    label: "무통장입금",
+    hint: "주문 후 안내드리는 계좌로 입금해 주세요. 입금 확인 후 배송이 시작됩니다.",
+    pg: false,
+  },
+];
+
 export default function CheckoutForm({
   products,
   cardEnabled,
 }: {
   products: Product[];
-  /** 나이스페이먼츠 키가 설정된 경우에만 카드 결제를 보여준다 */
+  /** 나이스페이먼츠 키가 설정된 경우에만 PG 결제 수단을 보여준다 */
   cardEnabled: boolean;
 }) {
   const { cart, clearCart, ready } = useStore();
-  const [method, setMethod] = useState<"BANK_TRANSFER" | "CARD">(
+  const [method, setMethod] = useState<PaymentMethod>(
     cardEnabled ? "CARD" : "BANK_TRANSFER"
   );
   const [payError, setPayError] = useState<string | null>(null);
@@ -239,50 +279,29 @@ export default function CheckoutForm({
           <section className="mt-12">
             <h2 className={sectionLabel}>결제 수단</h2>
             <div className="mt-4 space-y-2">
-              {cardEnabled && (
+              {METHOD_OPTIONS.filter((o) => cardEnabled || !o.pg).map((o) => (
                 <label
+                  key={o.value}
                   className={`flex cursor-pointer items-start gap-3 border px-5 py-4 transition-colors ${
-                    method === "CARD" ? "border-[#1e1e1e]" : "border-neutral-200"
+                    method === o.value ? "border-[#1e1e1e]" : "border-neutral-200"
                   }`}
                 >
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="CARD"
-                    checked={method === "CARD"}
-                    onChange={() => setMethod("CARD")}
+                    value={o.value}
+                    checked={method === o.value}
+                    onChange={() => setMethod(o.value)}
                     className="mt-1 h-4 w-4 accent-black"
                   />
                   <span>
-                    <span className="block text-[14px]">카드 · 간편결제</span>
-                    <span className="mt-1 block text-[12px] leading-relaxed text-neutral-500">
-                      나이스페이먼츠 결제창에서 안전하게 결제됩니다. 결제 즉시
-                      주문이 확정됩니다.
+                    <span className="block text-[14px]">{o.label}</span>
+                    <span className="mt-1 block break-keep text-[12px] leading-relaxed text-neutral-500">
+                      {o.hint}
                     </span>
                   </span>
                 </label>
-              )}
-              <label
-                className={`flex cursor-pointer items-start gap-3 border px-5 py-4 transition-colors ${
-                  method === "BANK_TRANSFER" ? "border-[#1e1e1e]" : "border-neutral-200"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="BANK_TRANSFER"
-                  checked={method === "BANK_TRANSFER"}
-                  onChange={() => setMethod("BANK_TRANSFER")}
-                  className="mt-1 h-4 w-4 accent-black"
-                />
-                <span>
-                  <span className="block text-[14px]">무통장입금</span>
-                  <span className="mt-1 block text-[12px] leading-relaxed text-neutral-500">
-                    주문 후 입금 계좌를 안내드립니다. 입금 확인 후 배송이
-                    시작됩니다.
-                  </span>
-                </span>
-              </label>
+              ))}
             </div>
           </section>
         </div>
@@ -327,7 +346,7 @@ export default function CheckoutForm({
           >
             {pending
               ? "주문 처리 중…"
-              : method === "CARD"
+              : isPgMethod(method)
                 ? `${won(subtotal + fee)} 결제하기`
                 : `${won(subtotal + fee)} 주문하기`}
           </button>

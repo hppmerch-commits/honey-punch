@@ -44,7 +44,7 @@ export async function openNicepay(p: NicepayLaunch, onError: (msg: string) => vo
   const sdk = await loadNicepay();
   sdk.requestPay({
     clientId: p.clientId,
-    method: "card",
+    method: p.method,
     orderId: p.orderId,
     amount: p.amount,
     goodsName: p.goodsName,
@@ -52,6 +52,16 @@ export async function openNicepay(p: NicepayLaunch, onError: (msg: string) => vo
     buyerName: p.buyerName,
     buyerTel: p.buyerTel,
     buyerEmail: p.buyerEmail,
+
+    // 가상계좌: 입금자명은 규격상 필수. 기한은 기본 D+7을 쓰지 않고 3일로 줄인다
+    // (그만큼 재고가 묶여 있으므로).
+    ...(p.method === "vbank"
+      ? { vbankHolder: p.vbankHolder ?? p.buyerName, vbankValidHours: 72 }
+      : {}),
+
+    // 휴대폰 결제: 실물 배송 상품이므로 디지털 콘텐츠가 아니다.
+    ...(p.method === "cellphone" ? { isDigital: false } : {}),
+
     fnError: (r: { errorMsg?: string; resultMsg?: string }) =>
       onError(r?.errorMsg || r?.resultMsg || "결제가 취소되었습니다."),
   });

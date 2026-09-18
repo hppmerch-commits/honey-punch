@@ -2,8 +2,13 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { shipping } from "@/lib/site";
-import type { OrderItemInput } from "@/lib/order-types";
-import { cancelPayment, NicepayError } from "@/lib/nicepay";
+import {
+  isCashMethod,
+  isPgMethod,
+  type OrderItemInput,
+  type PaymentMethod,
+} from "@/lib/order-types";
+import { cancelPayment, NicepayError, type RefundAccount, type VbankInfo } from "@/lib/nicepay";
 
 /** 헷갈리는 글자(0/O, 1/I/L)를 뺀 주문번호용 문자셋 */
 const CODE_CHARS = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -28,7 +33,7 @@ export class OrderError extends Error {}
  * 주문 생성 — 가격은 클라이언트 값을 믿지 않고 DB에서 다시 계산한다.
  * 재고는 조건부 차감(재고 >= 수량)으로 동시 주문 경쟁을 막는다.
  */
-export type PaymentMethod = "BANK_TRANSFER" | "CARD";
+export type { PaymentMethod };
 
 export async function createOrder(input: {
   items: OrderItemInput[];
@@ -199,10 +204,19 @@ export async function listOrdersForAdmin({
 }
 
 /**
- * 취소 — 차감했던 재고를 되돌린다. 카드로 결제 완료된 주문은
- * 나이스페이먼츠 전액 취소(환불)가 성공해야만 취소 상태로 바꾼다.
+ * 취소 — 차감했던 재고를 되돌린다. 나이스페이먼츠로 거래가 잡혀 있으면
+ * PG 취소가 성공해야만 주문 상태를 바꾼다.
+ *
+ * - 카드·휴대폰·계좌이체 결제 완료: 승인 취소
+ * - 가상계좌 입금 완료 / 계좌이체 완료: 현금이 나갔으므로 환불계좌 필수
+ * - 가상계좌 입금 전: 발급취소 (돈이 안 들어왔으니 계좌 불필요)
+ * - 무통장입금: PG를 안 거치므로 재고만 되돌린다
  */
-export async function cancelOrder(id: string, reason = "판매자 취소") {
+export async function cancelOrder(
+  id: string,
+  reason = "판매자 취소",
+  refund?: RefundAccount
+) {
   const order = await prisma.order.findUnique({
     where: { id },
     include: { items: true },
@@ -215,13 +229,22 @@ export async function cancelOrder(id: string, reason = "판매자 취소") {
 
   // 환불이 먼저다 — PG 취소가 실패하면 주문 상태를 건드리지 않는다.
   let cancelledTid = "";
-  if (order.paymentMethod === "CARD" && order.status === "PAID" && order.pgTid) {
+  if (isPgMethod(order.paymentMethod) && order.pgTid) {
+    const cashRefund = isCashMethod(order.paymentMethod) && order.status === "PAID";
+    if (cashRefund && !refund) {
+      throw new OrderError("환불받으실 계좌 정보가 필요합니다.");
+    }
     try {
-      const r = await cancelPayment(order.pgTid, order.orderNumber, reason);
+      const r = await cancelPayment(
+        order.pgTid,
+        order.orderNumber,
+        reason,
+        cashRefund ? refund : undefined
+      );
       cancelledTid = r.cancelledTid ?? "";
     } catch (e) {
       const msg = e instanceof NicepayError ? e.message : "환불 요청에 실패했습니다.";
-      throw new OrderError(`카드 환불 실패: ${msg}`);
+      throw new OrderError(`결제 취소 실패: ${msg}`);
     }
   }
 
@@ -246,35 +269,71 @@ export async function cancelOrder(id: string, reason = "판매자 취소") {
 }
 
 /**
- * PG 승인 성공을 주문에 반영한다. 이미 결제된 주문이면 그대로 둔다(중복 콜백 대비).
+ * PG 승인(또는 가상계좌 입금) 성공을 주문에 반영한다.
+ * 이미 결제된 주문이면 그대로 둔다(중복 콜백 대비).
  */
 export async function markOrderPaidByPg(
   orderNumber: string,
-  pg: { tid: string; payMethod: string; cardName: string; paidAt: Date }
+  pg: {
+    tid: string;
+    payMethod: string;
+    cardName?: string;
+    bankName?: string;
+    paidAt: Date;
+  }
 ) {
   const res = await prisma.order.updateMany({
-    where: { orderNumber, status: "PENDING", paymentMethod: "CARD" },
+    where: {
+      orderNumber,
+      status: "PENDING",
+      paymentMethod: { not: "BANK_TRANSFER" },
+    },
     data: {
       status: "PAID",
       paidAt: pg.paidAt,
       pgTid: pg.tid,
       pgPayMethod: pg.payMethod,
-      pgCardName: pg.cardName,
+      ...(pg.cardName ? { pgCardName: pg.cardName } : {}),
+      ...(pg.bankName ? { pgBankName: pg.bankName } : {}),
     },
   });
   return res.count > 0;
 }
 
 /**
- * PG 쪽에서 이미 취소(환불)된 것을 웹훅으로 통보받았을 때 — 나이스페이 취소 API를
- * 다시 부르지 않고 주문 상태와 재고만 맞춘다. 이미 취소된 주문이면 아무것도 하지 않는다.
+ * 가상계좌 발급 완료 — 아직 입금 전이라 주문은 PENDING 그대로 두고
+ * 고객에게 안내할 계좌만 저장한다. 실제 입금은 웹훅으로 통보된다.
+ */
+export async function markOrderVbankIssued(
+  orderNumber: string,
+  pg: { tid: string; payMethod: string; vbank: VbankInfo }
+) {
+  const exp = pg.vbank.vbankExpDate ? new Date(pg.vbank.vbankExpDate) : null;
+  const res = await prisma.order.updateMany({
+    where: { orderNumber, status: "PENDING", paymentMethod: "VBANK" },
+    data: {
+      pgTid: pg.tid,
+      pgPayMethod: pg.payMethod,
+      pgVbankName: pg.vbank.vbankName ?? "",
+      pgVbankNumber: pg.vbank.vbankNumber ?? "",
+      pgVbankHolder: pg.vbank.vbankHolder ?? "",
+      pgVbankExpAt: exp && !Number.isNaN(exp.getTime()) ? exp : null,
+    },
+  });
+  return res.count > 0;
+}
+
+/**
+ * PG 쪽에서 이미 취소(환불)되었거나 가상계좌가 만료된 것을 웹훅으로 통보받았을 때 —
+ * 나이스페이 취소 API를 다시 부르지 않고 주문 상태와 재고만 맞춘다.
+ * 이미 취소된 주문이면 아무것도 하지 않는다.
  */
 export async function markOrderCancelledByPg(orderNumber: string, cancelledTid: string) {
   const order = await prisma.order.findUnique({
     where: { orderNumber },
     include: { items: true },
   });
-  if (!order || order.paymentMethod !== "CARD") return false;
+  if (!order || !isPgMethod(order.paymentMethod)) return false;
 
   return prisma.$transaction(async (tx) => {
     const flipped = await tx.order.updateMany({

@@ -9,7 +9,10 @@ import {
   statusTone,
   paymentMethodLabel,
   formatOrderDate,
+  isPgMethod,
+  needsRefundAccount,
 } from "@/lib/order-types";
+import { BANKS } from "@/lib/banks";
 import AdminShell from "../../AdminShell";
 import {
   markPaidAction,
@@ -37,7 +40,9 @@ export default async function AdminOrderDetailPage({
   const { error } = await searchParams;
   const order = await getOrderById(id);
   if (!order) notFound();
-  const isCard = order.paymentMethod === "CARD";
+  const pg = isPgMethod(order.paymentMethod);
+  const vbankIssued = order.paymentMethod === "VBANK" && Boolean(order.pgVbankNumber);
+  const refundAccountNeeded = needsRefundAccount(order);
 
   return (
     <AdminShell
@@ -128,11 +133,28 @@ export default async function AdminOrderDetailPage({
                 ["주문 일시", formatOrderDate(order.createdAt)],
                 ["결제 수단", paymentMethodLabel(order.paymentMethod)],
                 ...(order.paidAt
-                  ? [[isCard ? "결제 완료" : "입금 확인", formatOrderDate(order.paidAt)] as const]
+                  ? [[pg ? "결제 완료" : "입금 확인", formatOrderDate(order.paidAt)] as const]
+                  : []),
+                ...(vbankIssued
+                  ? [
+                      [
+                        "가상계좌",
+                        `${order.pgVbankName} ${order.pgVbankNumber} (${order.pgVbankHolder})`,
+                      ] as const,
+                      ...(order.pgVbankExpAt
+                        ? [["입금 기한", formatOrderDate(order.pgVbankExpAt)] as const]
+                        : []),
+                    ]
                   : []),
                 ...(order.pgTid
                   ? [
-                      ["카드", order.pgCardName || order.pgPayMethod || "—"] as const,
+                      [
+                        "결제 정보",
+                        order.pgCardName ||
+                          order.pgBankName ||
+                          order.pgPayMethod ||
+                          "—",
+                      ] as const,
                       ["거래번호(TID)", order.pgTid] as const,
                     ]
                   : []),
@@ -170,15 +192,22 @@ export default async function AdminOrderDetailPage({
             </p>
           )}
 
-          {order.status === "PENDING" && isCard && (
+          {order.status === "PENDING" && vbankIssued && (
             <p className="text-[12px] leading-relaxed text-neutral-500">
-              고객이 카드 결제창을 닫아 아직 결제되지 않은 주문입니다. 고객이 주문
+              가상계좌가 발급되어 입금을 기다리는 주문입니다. 입금되면 나이스페이먼츠
+              통보로 자동으로 입금 확인 처리됩니다. 기한이 지나면 자동 취소됩니다.
+            </p>
+          )}
+
+          {order.status === "PENDING" && pg && !vbankIssued && (
+            <p className="text-[12px] leading-relaxed text-neutral-500">
+              고객이 결제창을 닫아 아직 결제되지 않은 주문입니다. 고객이 주문
               상세에서 다시 결제하면 자동으로 결제 완료로 바뀝니다. 오래 방치되면
               아래에서 취소해 재고를 되돌리세요.
             </p>
           )}
 
-          {order.status === "PENDING" && !isCard && (
+          {order.status === "PENDING" && !pg && (
             <>
               <form action={markPaidAction}>
                 <input type="hidden" name="id" value={order.id} />
@@ -250,10 +279,50 @@ export default async function AdminOrderDetailPage({
           )}
 
           {(order.status === "PENDING" || order.status === "PAID") && (
-            <form action={cancelOrderAction} className="border-t border-neutral-100 pt-4">
+            <form action={cancelOrderAction} className="space-y-3 border-t border-neutral-100 pt-4">
               <input type="hidden" name="id" value={order.id} />
+              {/* 현금성 결제는 돌려보낼 계좌가 있어야 취소된다 */}
+              {refundAccountNeeded && (
+                <>
+                  <p className="text-[12px] leading-relaxed text-neutral-500">
+                    {paymentMethodLabel(order.paymentMethod)}로 입금된 주문입니다. 고객에게
+                    환불할 계좌를 입력해야 취소됩니다.
+                  </p>
+                  <select
+                    name="refundBankCode"
+                    required
+                    defaultValue=""
+                    className="h-12 w-full border border-neutral-300 px-4 text-[14px] outline-none focus:border-black"
+                  >
+                    <option value="" disabled>
+                      환불 은행
+                    </option>
+                    {BANKS.map((b) => (
+                      <option key={b.code} value={b.code}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    name="refundAccount"
+                    required
+                    inputMode="numeric"
+                    placeholder="환불 계좌번호"
+                    className="h-12 w-full border border-neutral-300 px-4 text-[14px] outline-none focus:border-black"
+                  />
+                  <input
+                    name="refundHolder"
+                    required
+                    maxLength={20}
+                    placeholder="예금주"
+                    className="h-12 w-full border border-neutral-300 px-4 text-[14px] outline-none focus:border-black"
+                  />
+                </>
+              )}
               <button className={`${btn} w-full border border-neutral-300 text-neutral-500 hover:border-black hover:text-black`}>
-                {isCard && order.status === "PAID" ? "주문 취소 · 카드 환불" : "주문 취소 (재고 복원)"}
+                {order.status === "PAID" && pg
+                  ? "주문 취소 · 환불"
+                  : "주문 취소 (재고 복원)"}
               </button>
             </form>
           )}

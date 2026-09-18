@@ -7,6 +7,9 @@ import {
   statusLabel,
   paymentMethodLabel,
   formatOrderDate,
+  isPgMethod,
+  isCashMethod,
+  needsRefundAccount,
 } from "@/lib/order-types";
 import { bankTransfer, hasBankInfo } from "@/lib/site";
 import { btnOutline, sectionLabel } from "@/lib/ui";
@@ -22,25 +25,31 @@ export default async function OrderCompletePage({
   searchParams,
 }: {
   params: Promise<{ no: string }>;
-  searchParams: Promise<{ pay?: string; msg?: string; paid?: string }>;
+  searchParams: Promise<{ pay?: string; msg?: string; paid?: string; issued?: string }>;
 }) {
   const { no } = await params;
   const sp = await searchParams;
   const order = await getOrderByNumber(decodeURIComponent(no));
   if (!order) notFound();
 
-  const isCard = order.paymentMethod === "CARD";
-  const cardUnpaid = isCard && order.status === "PENDING";
-  const cardPaid = isCard && order.status === "PAID";
-  const bankPaid = !isCard && order.status === "PAID";
-  const cancellable = order.status === "PENDING" || cardPaid;
+  const pg = isPgMethod(order.paymentMethod);
+  /** 가상계좌가 발급된 상태 — 결제창을 다시 열 게 아니라 그 계좌로 입금해야 한다 */
+  const vbankIssued = order.paymentMethod === "VBANK" && Boolean(order.pgVbankNumber);
+  /** 결제창이 닫혀 결제가 끝나지 않은 상태 */
+  const pgUnpaid = pg && order.status === "PENDING" && !vbankIssued;
+  const pgPaid = pg && order.status === "PAID";
+  /** 무통장입금은 우리가 통장을 보고 직접 확인하므로 자동 환불이 안 된다 */
+  const manualBankPaid = order.paymentMethod === "BANK_TRANSFER" && order.status === "PAID";
+  const cancellable = order.status === "PENDING" || pgPaid;
   const heading = order.status === "CANCELLED"
     ? "취소된 주문입니다"
-    : cardUnpaid
+    : pgUnpaid
       ? "결제가 완료되지 않았습니다"
-      : cardPaid
-        ? "결제가 완료되었습니다"
-        : "주문이 접수되었습니다";
+      : vbankIssued && order.status === "PENDING"
+        ? "입금을 기다리고 있습니다"
+        : pgPaid
+          ? "결제가 완료되었습니다"
+          : "주문이 접수되었습니다";
 
   return (
     <main className="px-6 py-14 lg:px-12">
@@ -57,13 +66,13 @@ export default async function OrderCompletePage({
           {statusLabel(order.status, order.paymentMethod)}
         </p>
 
-        {/* 결제 완료 → 장바구니 비움 (무통장은 주문서에서 이미 비웠지만 다시 해도 무해) */}
-        {(cardPaid || !isCard) && order.status !== "CANCELLED" && <ClearCart />}
+        {/* 결제가 끝났거나 계좌가 발급된 주문 → 장바구니 비움 (다시 결제할 게 남았으면 그대로 둔다) */}
+        {!pgUnpaid && order.status !== "CANCELLED" && <ClearCart />}
 
-        {/* 카드 결제 미완료 — 실패 사유 + 다시 결제 */}
-        {cardUnpaid && (
+        {/* 결제 미완료 — 실패 사유 + 다시 결제 */}
+        {pgUnpaid && (
           <div className="mt-8 border border-[#1e1e1e] px-5 py-5">
-            <p className="text-[13px] tracking-[0.08em]">카드 결제 안내</p>
+            <p className="text-[13px] tracking-[0.08em]">결제 안내</p>
             <p className="mt-2 break-keep text-[13px] leading-relaxed text-neutral-600">
               {sp.pay === "failed" && sp.msg
                 ? `결제가 진행되지 않았습니다: ${sp.msg}`
@@ -77,22 +86,44 @@ export default async function OrderCompletePage({
           </div>
         )}
 
-        {/* 카드 결제 완료 */}
-        {cardPaid && (
-          <div className="mt-8 border border-neutral-200 px-5 py-5">
-            <p className="text-[13px] tracking-[0.08em]">결제 정보</p>
-            <p className="mt-2 text-[13px] leading-relaxed text-neutral-600">
-              {order.pgCardName ? `${order.pgCardName} · ` : ""}
-              {won(order.total)} 결제 완료
-              {order.paidAt && ` · ${formatOrderDate(order.paidAt)}`}
+        {/* 가상계좌 발급 완료 — 입금 대기 */}
+        {vbankIssued && order.status === "PENDING" && (
+          <div className="mt-8 border border-[#1e1e1e] px-5 py-5">
+            <p className="text-[13px] tracking-[0.08em]">가상계좌 입금 안내</p>
+            <p className="mt-2 text-[14px] leading-relaxed">
+              {order.pgVbankName}{" "}
+              <b className="tracking-wide">{order.pgVbankNumber}</b>
               <br />
-              입금 확인 절차 없이 바로 배송 준비가 시작됩니다.
+              예금주: {order.pgVbankHolder}
+            </p>
+            <p className="mt-2 break-keep text-[12px] leading-relaxed text-neutral-500">
+              {won(order.total)}원을
+              {order.pgVbankExpAt && ` ${formatOrderDate(order.pgVbankExpAt)}까지`} 입금해
+              주세요. 입금이 확인되면 자동으로 배송 준비가 시작됩니다. 기한이 지나면 주문은
+              자동으로 취소됩니다.
             </p>
           </div>
         )}
 
-        {/* 입금 안내 */}
-        {!isCard && order.status === "PENDING" && (
+        {/* 결제 완료 */}
+        {pgPaid && (
+          <div className="mt-8 border border-neutral-200 px-5 py-5">
+            <p className="text-[13px] tracking-[0.08em]">결제 정보</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-neutral-600">
+              {paymentMethodLabel(order.paymentMethod)}
+              {order.pgCardName && ` · ${order.pgCardName}`}
+              {order.pgBankName && ` · ${order.pgBankName}`}
+              {" · "}
+              {won(order.total)} {order.paymentMethod === "VBANK" ? "입금 확인" : "결제 완료"}
+              {order.paidAt && ` · ${formatOrderDate(order.paidAt)}`}
+              <br />
+              별도 확인 절차 없이 바로 배송 준비가 시작됩니다.
+            </p>
+          </div>
+        )}
+
+        {/* 무통장입금 안내 */}
+        {order.paymentMethod === "BANK_TRANSFER" && order.status === "PENDING" && (
           <div className="mt-8 border border-[#1e1e1e] px-5 py-5">
             <p className="text-[13px] tracking-[0.08em]">무통장입금 안내</p>
             {hasBankInfo() ? (
@@ -103,7 +134,7 @@ export default async function OrderCompletePage({
                 예금주: {bankTransfer.holder}
                 <br />
                 <span className="text-[12px] text-neutral-500">
-                  {won(order.total)}을 입금해 주시면 확인 후 배송이 시작됩니다.
+                  {won(order.total)}원을 입금해 주시면 확인 후 배송이 시작됩니다.
                 </span>
               </p>
             ) : (
@@ -194,19 +225,24 @@ export default async function OrderCompletePage({
         {cancellable && (
           <section className="mt-10">
             <h2 className={sectionLabel}>주문 취소</h2>
-            <CancelOrderForm orderNumber={order.orderNumber} isCardPaid={cardPaid} />
+            <CancelOrderForm
+              orderNumber={order.orderNumber}
+              isPaid={pgPaid}
+              needsRefundAccount={needsRefundAccount(order)}
+            />
           </section>
         )}
-        {bankPaid && (
+        {manualBankPaid && (
           <p className="mt-10 break-keep text-[12px] leading-relaxed text-neutral-500">
-            입금이 확인된 주문은 환불 계좌 확인이 필요해 이 화면에서 바로 취소되지 않습니다.
-            취소를 원하시면 주문번호와 함께 문의해 주세요.
+            입금이 확인된 무통장 주문은 환불 계좌 확인이 필요해 이 화면에서 바로 취소되지
+            않습니다. 취소를 원하시면 주문번호와 함께 문의해 주세요.
           </p>
         )}
-        {order.status === "CANCELLED" && isCard && order.pgCancelledTid && (
+        {order.status === "CANCELLED" && pg && order.pgCancelledTid && (
           <p className="mt-8 break-keep text-[13px] leading-relaxed text-neutral-600">
-            카드 승인 취소가 완료되었습니다. 카드사에 따라 영업일 기준 1~5일 뒤 취소 내역이
-            표시됩니다.
+            {isCashMethod(order.paymentMethod)
+              ? "환불이 접수되었습니다. 은행에 따라 영업일 기준 1~3일 뒤 입금됩니다."
+              : "결제 승인 취소가 완료되었습니다. 카드사·통신사에 따라 영업일 기준 1~5일 뒤 취소 내역이 표시됩니다."}
           </p>
         )}
 

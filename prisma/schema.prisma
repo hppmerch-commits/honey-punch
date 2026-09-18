@@ -82,7 +82,8 @@ model Order {
   shippingFee Int
   total       Int
 
-  /// BANK_TRANSFER(무통장입금) | CARD(나이스페이먼츠 결제창)
+  /// BANK_TRANSFER(무통장입금) | CARD(신용카드) | BANK(계좌이체) | VBANK(가상계좌) | CELLPHONE(휴대폰)
+  /// BANK_TRANSFER만 우리가 직접 처리하고 나머지는 나이스페이먼츠 결제창을 거친다.
   paymentMethod String    @default("BANK_TRANSFER")
   paidAt        DateTime?
 
@@ -90,7 +91,14 @@ model Order {
   pgTid          String? @unique
   pgPayMethod    String  @default("")
   pgCardName     String  @default("")
+  pgBankName     String  @default("")
   pgCancelledTid String  @default("")
+
+  /// 가상계좌 발급 정보 — 입금 전까지 고객에게 안내한다.
+  pgVbankName   String    @default("")
+  pgVbankNumber String    @default("")
+  pgVbankHolder String    @default("")
+  pgVbankExpAt  DateTime?
 
   courier        String @default("")
   trackingNumber String @default("")

@@ -5,7 +5,7 @@ import { relaunchPaymentAction } from "@/app/(store)/checkout/actions";
 import { openNicepay } from "./launch";
 import { btnPrimary } from "@/lib/ui";
 
-/** 결제창을 닫았거나 실패한 카드 주문을 주문 상세에서 다시 결제한다. */
+/** 결제창을 닫았거나 실패한 주문을 주문 상세에서 다시 결제한다. 수단은 주문에 저장된 것을 쓴다. */
 export default function PayAgainButton({
   orderNumber,
   amountLabel,

@@ -5,7 +5,12 @@ import {
   nicepayClientId,
   NicepayError,
 } from "@/lib/nicepay";
-import { getOrderByNumber, markOrderPaidByPg } from "@/lib/orders";
+import {
+  getOrderByNumber,
+  markOrderPaidByPg,
+  markOrderVbankIssued,
+} from "@/lib/orders";
+import { isPgMethod } from "@/lib/order-types";
 import { publicOrigin } from "@/lib/origin";
 
 export const dynamic = "force-dynamic";
@@ -53,21 +58,39 @@ export async function POST(req: Request) {
 
   // 3) 주문 대조 — 금액은 우리 DB 값이 기준
   const order = await getOrderByNumber(orderId);
-  if (!order || order.paymentMethod !== "CARD") return fail("주문을 찾을 수 없습니다.");
+  if (!order || !isPgMethod(order.paymentMethod)) return fail("주문을 찾을 수 없습니다.");
   if (order.status === "PAID") return toOrder({ paid: "1" }); // 중복 콜백
   if (order.status !== "PENDING") return fail("결제를 진행할 수 없는 주문 상태입니다.");
   if (Number(f("amount")) !== order.total) return fail("결제 금액이 주문 금액과 다릅니다.");
 
-  // 4) 승인
+  // 4) 승인 — 가상계좌는 계좌 발급("ready")까지만 끝나고 입금은 나중에 웹훅으로 온다.
   try {
     const approved = await approvePayment(f("tid"), order.total);
-    const ok = await markOrderPaidByPg(order.orderNumber, {
+
+    if (approved.status === "ready") {
+      if (order.paymentMethod !== "VBANK" || !approved.vbank?.vbankNumber) {
+        console.error("nicepay return: unexpected ready", {
+          orderId,
+          method: order.paymentMethod,
+          payMethod: approved.payMethod,
+        });
+        return fail("결제 결과를 확인하지 못했습니다. 주문조회에서 다시 시도해 주세요.");
+      }
+      await markOrderVbankIssued(order.orderNumber, {
+        tid: approved.tid,
+        payMethod: approved.payMethod ?? "vbank",
+        vbank: approved.vbank,
+      });
+      return toOrder({ issued: "1" });
+    }
+
+    await markOrderPaidByPg(order.orderNumber, {
       tid: approved.tid,
       payMethod: approved.payMethod ?? "card",
       cardName: approved.card?.cardName ?? "",
+      bankName: approved.bank?.bankName ?? "",
       paidAt: approved.paidAt ? new Date(approved.paidAt) : new Date(),
     });
-    if (!ok) return toOrder({ paid: "1" }); // 다른 요청이 먼저 반영한 경우
     return toOrder({ paid: "1" });
   } catch (e) {
     const msg = e instanceof NicepayError ? e.message : "결제 승인 중 오류가 발생했습니다.";
