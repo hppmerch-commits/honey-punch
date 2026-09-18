@@ -102,29 +102,46 @@ export async function POST(req: Request) {
   }
 
   const status = String(h.status ?? "");
+  // 통보가 들어왔다는 사실 자체를 남긴다 — 웹훅이 등록·동작 중인지 확인할 방법이 이것뿐이다.
+  // (applied=false는 이미 같은 상태라 바꿀 게 없었다는 뜻이고, 정상이다.)
+  const log = (applied: boolean) =>
+    console.log("nicepay webhook", {
+      orderId,
+      status,
+      payMethod: h.payMethod ?? "",
+      method: order.paymentMethod,
+      applied,
+    });
+
   try {
     if (status === "paid" && h.resultCode === "0000") {
       // 카드·계좌이체·휴대폰 승인, 그리고 가상계좌 입금이 모두 여기로 들어온다.
-      await markOrderPaidByPg(order.orderNumber, {
-        tid,
-        payMethod: h.payMethod ?? "",
-        cardName: h.card?.cardName ?? "",
-        bankName: h.bank?.bankName ?? "",
-        paidAt: h.paidAt ? new Date(h.paidAt) : new Date(),
-      });
+      log(
+        await markOrderPaidByPg(order.orderNumber, {
+          tid,
+          payMethod: h.payMethod ?? "",
+          cardName: h.card?.cardName ?? "",
+          bankName: h.bank?.bankName ?? "",
+          paidAt: h.paidAt ? new Date(h.paidAt) : new Date(),
+        })
+      );
     } else if (status === "ready" && h.vbank?.vbankNumber) {
       // 가상계좌 발급 — 주문서 흐름에서 이미 저장했겠지만 놓쳤을 때를 위한 보정.
-      await markOrderVbankIssued(order.orderNumber, {
-        tid,
-        payMethod: h.payMethod ?? "vbank",
-        vbank: h.vbank,
-      });
+      log(
+        await markOrderVbankIssued(order.orderNumber, {
+          tid,
+          payMethod: h.payMethod ?? "vbank",
+          vbank: h.vbank,
+        })
+      );
     } else if (status === "cancelled" || status === "expired") {
       // expired = 가상계좌 입금기한 만료. 주문을 닫고 재고를 되돌린다.
-      await markOrderCancelledByPg(order.orderNumber, String(h.cancelledTid ?? ""));
+      log(await markOrderCancelledByPg(order.orderNumber, String(h.cancelledTid ?? "")));
     } else if (status === "partialCancelled") {
       // 부분취소는 사이트에 개념이 없으므로 상태는 두고 기록만 남긴다 — 관리자가 확인.
       console.warn("nicepay webhook: partial cancel", { orderId, cancelledTid: h.cancelledTid });
+    } else {
+      log(false);
     }
   } catch (e) {
     // 같은 tid가 다른 주문에 이미 붙어 있는 경우(P2002)는 재전송해도 절대 성공하지 않는다.
