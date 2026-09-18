@@ -10,6 +10,7 @@ import { shipping } from "@/lib/site";
 import { useStore, itemKey } from "@/components/StoreProvider";
 import { placeOrderAction, type CheckoutState } from "./actions";
 import { openNicepay } from "@/components/nicepay/launch";
+import AddressFields from "@/components/AddressFields";
 import {
   fieldInput,
   fieldLabel,
@@ -238,31 +239,7 @@ export default function CheckoutForm({
                 />
               </label>
 
-              <div className="grid gap-4 sm:grid-cols-[140px_1fr]">
-                <label className="block">
-                  <span className={fieldLabel}>우편번호</span>
-                  <input
-                    name="postcode"
-                    inputMode="numeric"
-                    autoComplete="postal-code"
-                    className={fieldInput}
-                  />
-                </label>
-                <label className="block">
-                  <span className={fieldLabel}>주소 *</span>
-                  <input
-                    name="address1"
-                    required
-                    autoComplete="street-address"
-                    className={fieldInput}
-                  />
-                </label>
-              </div>
-
-              <label className="block">
-                <span className={fieldLabel}>상세 주소</span>
-                <input name="address2" className={fieldInput} />
-              </label>
+              <AddressFields />
 
               <label className="block">
                 <span className={fieldLabel}>배송 요청사항</span>
