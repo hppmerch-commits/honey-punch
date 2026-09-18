@@ -102,7 +102,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       removeFromCart: (key) =>
         setCart((prev) => prev.filter((i) => itemKey(i) !== key)),
 
-      clearCart: () => setCart([]),
+      // 이미 비어 있으면 같은 참조를 돌려줘 불필요한 재렌더(및 효과 재실행)를 막는다.
+      clearCart: () => setCart((prev) => (prev.length ? [] : prev)),
 
       wishlist,
       toggleWishlist: (slug) =>
