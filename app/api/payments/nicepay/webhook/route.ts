@@ -84,10 +84,15 @@ export async function POST(req: Request) {
     return ok();
   }
 
-  // 서명이 붙어 있는데 맞지 않으면 위조이거나 키 설정 오류다 — OK를 주지 않는다.
+  // 서명이 맞지 않으면 상태는 절대 바꾸지 않는다. 다만 응답은 OK로 준다:
+  //  - 가맹점관리자의 웹훅 등록·TEST 호출은 가짜 거래(UTWEBHOOK…)를 보내는데,
+  //    규격상 서명은 "유효한 거래건에 한하여" 맞으므로 이 전문은 검증될 수 없다.
+  //    여기서 400을 주면 웹훅 등록 자체가 실패한다.
+  //  - 위조 요청도 아무것도 바꾸지 못하므로 OK를 줘도 잃는 것이 없다.
+  // 실제 거래(tid가 UTWEBHOOK이 아닌 것)에서 이 로그가 찍히면 시크릿 키 설정을 의심할 것.
   if (!verifyResultSignature({ tid, amount: h.amount ?? "", ediDate, signature })) {
-    console.error("nicepay webhook: bad signature", { tid, orderId, status: h.status });
-    return new NextResponse("invalid signature", { status: 400 });
+    console.error("nicepay webhook: bad signature, ignored", { tid, orderId, status: h.status });
+    return ok();
   }
 
   const order = await getOrderByNumber(orderId);
